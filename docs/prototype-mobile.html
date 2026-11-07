@@ -1,0 +1,630 @@
+<!DOCTYPE html><html class="dark" lang="pt-BR"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+<title>Librarytrix // Minimalist Cyberpunk Codex PWA</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-variant": "#353439",
+            "surface-dim": "#131317",
+            "secondary-container": "#ff4a8d",
+            "inverse-surface": "#e4e1e8",
+            "error-container": "#93000a",
+            "on-secondary-fixed-variant": "#8f0044",
+            "outline-variant": "#3b494b",
+            "surface-container-lowest": "#0e0e12",
+            "tertiary-container": "#33fb0a",
+            "surface-container-highest": "#353439",
+            "primary": "#dbfcff",
+            "on-primary-container": "#006970",
+            "background": "#131317",
+            "tertiary-fixed": "#79ff5b",
+            "on-tertiary-container": "#106e00",
+            "tertiary": "#e1ffd1",
+            "on-surface": "#e4e1e8",
+            "on-error": "#690005",
+            "surface-container-low": "#1b1b20",
+            "on-secondary-fixed": "#3f001a",
+            "on-background": "#e4e1e8",
+            "on-tertiary-fixed-variant": "#095300",
+            "surface-container": "#1f1f24",
+            "surface-container-high": "#2a292e",
+            "surface-bright": "#39393e",
+            "on-tertiary": "#053900",
+            "on-secondary": "#65002e",
+            "secondary-fixed-dim": "#ffb1c4",
+            "surface": "#131317",
+            "secondary-fixed": "#ffd9e1",
+            "on-secondary-container": "#590028",
+            "error": "#ffb4ab",
+            "primary-fixed-dim": "#00dbe9",
+            "on-error-container": "#ffdad6",
+            "primary-fixed": "#7df4ff",
+            "tertiary-fixed-dim": "#2ae500",
+            "on-primary-fixed": "#002022",
+            "secondary": "#ffb1c4",
+            "surface-tint": "#00dbe9",
+            "primary-container": "#00f0ff",
+            "inverse-primary": "#006970",
+            "on-primary": "#00363a",
+            "outline": "#849495",
+            "on-primary-fixed-variant": "#004f54",
+            "on-surface-variant": "#b9cacb",
+            "inverse-on-surface": "#303035",
+            "on-tertiary-fixed": "#022100"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-sm": "0.5rem",
+            "space-xl": "2.5rem",
+            "space-xs": "0.25rem",
+            "gutter-tablet": "1.25rem",
+            "space-md": "1rem",
+            "margin-tablet": "1.5rem",
+            "margin": "1rem",
+            "margin-desktop": "2.5rem",
+            "space-lg": "1.5rem",
+            "gutter": "1rem",
+            "gutter-desktop": "1.5rem"
+          },
+          "fontFamily": {
+            "headline-xl": ["Space Grotesk"],
+            "label-sm": ["JetBrains Mono"],
+            "headline-lg-mobile": ["Space Grotesk"],
+            "body-md": ["JetBrains Mono"],
+            "title-md": ["JetBrains Mono"],
+            "code-dense": ["JetBrains Mono"],
+            "headline-lg": ["Space Grotesk"],
+            "headline-xl-mobile": ["Space Grotesk"],
+            "headline-md": ["Space Grotesk"],
+            "body-sm": ["JetBrains Mono"],
+            "body-lg": ["JetBrains Mono"],
+            "label-md": ["JetBrains Mono"],
+            "headline-sm": ["Space Grotesk"]
+          },
+          "fontSize": {
+            "headline-xl": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "label-sm": ["10px", { "lineHeight": "14px", "letterSpacing": "0.12em", "fontWeight": "600" }],
+            "headline-lg-mobile": ["26px", { "lineHeight": "34px", "letterSpacing": "0em", "fontWeight": "700" }],
+            "body-md": ["14px", { "lineHeight": "22px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "title-md": ["16px", { "lineHeight": "24px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+            "code-dense": ["11px", { "lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "500" }],
+            "headline-lg": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+            "headline-xl-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+            "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "0em", "fontWeight": "600" }],
+            "body-sm": ["12px", { "lineHeight": "18px", "letterSpacing": "0.02em", "fontWeight": "400" }],
+            "body-lg": ["16px", { "lineHeight": "26px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.08em", "fontWeight": "600" }],
+            "headline-sm": ["20px", { "lineHeight": "28px", "letterSpacing": "0.02em", "fontWeight": "600" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 20px;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-feature-settings: 'liga';
+      -webkit-font-smoothing: antialiased;
+    }
+    
+    /* Cyberpunk HUD scanline and ambient effects */
+    .cyber-scanlines {
+      background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0, 240, 255, 0.015) 4px);
+    }
+    .neon-glow-cyan {
+      box-shadow: 0 0 14px -2px rgba(0, 240, 255, 0.45), inset 0 0 8px -2px rgba(0, 240, 255, 0.2);
+    }
+    .neon-glow-magenta {
+      box-shadow: 0 0 14px -2px rgba(255, 0, 127, 0.45);
+    }
+    .neon-pulse-green {
+      box-shadow: 0 0 8px rgba(51, 251, 10, 0.4);
+    }
+    /* Hide scrollbar for category row while keeping touch swiping smooth */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-body-md text-body-md cyber-scanlines min-h-screen flex flex-col antialiased selection:bg-primary-container selection:text-background pb-20">
+<!-- ================= TOP APP BAR (PWA SHELL) ================= -->
+<header class="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-4 py-3 bg-surface dark:bg-surface border-b border-outline-variant dark:border-outline-variant shadow-lg backdrop-blur-md">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-container" data-icon="terminal">terminal</span>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm font-bold text-primary dark:text-primary tracking-wider uppercase leading-none">LIBRARYTRIX // DB-01</span>
+<span class="font-label-sm text-label-sm text-outline tracking-widest mt-0.5">CODEX PWA v4.1 • NODE #0842</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<!-- Search button -->
+<button aria-label="Pesquisar" class="p-1.5 text-on-surface-variant hover:text-primary-container transition-colors duration-150 active:opacity-75">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+</button>
+<!-- User / Operator Avatar -->
+<div class="flex items-center gap-1.5 pl-1 border-l border-outline-variant">
+<div class="w-6 h-6 rounded bg-surface-container border border-primary-container/40 flex items-center justify-center text-primary font-label-sm text-label-sm font-bold">
+          OP
+        </div>
+</div>
+</div>
+</header>
+<!-- ================= SUB-HEADER: PWA TELEMETRY STRIP ================= -->
+
+<!-- ================= MAIN CONTENT CANVAS (MOBILE HUD STREAM) ================= -->
+<main class="flex-1 px-4 pt-3 pb-8 space-y-4 max-w-lg mx-auto w-full mt-14">
+<!-- HERO / COMMAND BAR WITH + NOVO LIVRO -->
+<section class="flex items-center justify-between pt-1">
+<div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary tracking-tight">
+          Terminal de Leitura
+        </h1>
+<p class="font-label-sm text-label-sm text-on-surface-variant tracking-wider">
+          CLASSIFICAÇÃO COGNITIVA &amp; CRÍTICAS
+        </p>
+</div>
+<button class="flex items-center gap-1.5 bg-surface-container-high border border-outline hover:border-primary-container text-primary px-3 py-1.5 text-label-sm font-label-sm font-bold transition-all duration-150 active:scale-95 shadow-sm">
+<span class="material-symbols-outlined text-[16px] text-primary-container" data-icon="add">add</span>
+<span class="">NOVO LIVRO</span>
+</button>
+</section>
+<!-- QUICK METRIC SUMMARY (HUD TELEMETRY BENTO PILLS) -->
+<section class="grid grid-cols-3 gap-2 py-1">
+<div class="bg-surface-container p-2.5 border border-outline-variant/60 flex flex-col justify-between relative overflow-hidden">
+<div class="text-outline font-label-sm text-label-sm uppercase tracking-wider">Acervo</div>
+<div class="font-headline-sm text-headline-sm font-bold text-primary mt-1">142 <span class="font-label-sm text-label-sm font-normal text-on-surface-variant">VOL</span></div>
+<div class="w-full bg-surface-container-high h-1 mt-2">
+<div class="bg-primary-container h-1 w-[72%]"></div>
+</div>
+</div>
+<div class="bg-surface-container p-2.5 border border-outline-variant/60 flex flex-col justify-between">
+<div class="text-outline font-label-sm text-label-sm uppercase tracking-wider">Avaliação</div>
+<div class="font-headline-sm text-headline-sm font-bold text-tertiary-container mt-1">4.6 <span class="font-label-sm text-label-sm font-normal text-tertiary">★</span></div>
+<div class="font-code-dense text-code-dense text-on-surface-variant mt-2 flex items-center gap-1">
+<span class="text-tertiary-container">▲</span> 94% CRITICADOS
+        </div>
+</div>
+<div class="bg-surface-container p-2.5 border border-outline-variant/60 flex flex-col justify-between">
+<div class="text-outline font-label-sm text-label-sm uppercase tracking-wider">Sincronia</div>
+<div class="font-headline-sm text-headline-sm font-bold text-primary-fixed mt-1">99.8%</div>
+<div class="font-code-dense text-code-dense text-tertiary mt-2 flex items-center gap-1">
+<span class="inline-block w-1.5 h-1.5 rounded-full bg-tertiary-container"></span> INSTANTÂNEA
+        </div>
+</div>
+</section>
+<!-- ================= PROMINENT FEATURE: CATEGORY CONTROL & + NOVA CATEGORIA ================= -->
+<section class="bg-surface-container-low p-3 border-2 border-primary-container/40 relative">
+<!-- HUD Corner Decorators -->
+<div class="absolute -top-1 -left-1 w-2 h-2 bg-primary-container"></div>
+<div class="absolute -top-1 -right-1 w-2 h-2 bg-primary-container"></div>
+<div class="flex items-center justify-between mb-2.5">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-container text-[18px]" data-icon="tune">tune</span>
+<span class="font-label-md text-label-md font-bold text-on-surface tracking-wider uppercase">Filtros &amp; Categorias</span>
+<span class="bg-surface-variant text-primary font-label-sm text-label-sm px-1.5 py-0.2">06 TOTAL</span>
+</div>
+<!-- HIGHLY PROMINENT + NOVA CATEGORIA BUTTON -->
+<button class="relative group flex items-center gap-1 px-3 py-1.5 bg-primary-container text-background font-label-sm text-label-sm font-bold neon-glow-cyan active:scale-95 transition-all duration-150" id="open-new-cat-modal">
+<span class="material-symbols-outlined text-[16px] text-background font-bold" data-icon="add_circle">add_circle</span>
+<span class="tracking-wider">[ + NOVA CATEGORIA ]</span>
+<span class="absolute -bottom-1 right-0 text-[8px] bg-secondary-container text-on-secondary font-code-dense px-1 uppercase tracking-tighter">CUSTOM</span>
+</button>
+</div>
+<!-- HORIZONTAL SCROLL CHIPS INCLUDING ACTIVE STATES -->
+<div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+<!-- ALL / TODOS CHIP (ACTIVE) -->
+<button class="whitespace-nowrap flex items-center gap-1 px-2.5 py-1 bg-primary text-background border border-primary font-label-sm text-label-sm font-bold transition-all shadow-sm">
+<span class="">[x] TODOS</span>
+<span class="opacity-80 text-[10px]">(06)</span>
+</button>
+<!-- CYBERPUNK CHIP -->
+<button class="whitespace-nowrap flex items-center gap-1.5 px-2.5 py-1 bg-[#39ff14]/10 border border-[#39ff14] text-[#39ff14] font-label-sm text-label-sm font-bold hover:bg-[#39ff14]/20 transition-all">
+<span class="w-1.5 h-1.5 rounded-full bg-[#39ff14]"></span>
+<span class="">CYBERPUNK</span>
+<span class="opacity-75 text-[10px]">(02)</span>
+</button>
+<!-- FICÇÃO CIENTÍFICA CHIP -->
+<button class="whitespace-nowrap flex items-center gap-1.5 px-2.5 py-1 bg-[#00f0ff]/10 border border-[#00f0ff] text-[#00f0ff] font-label-sm text-label-sm font-bold hover:bg-[#00f0ff]/20 transition-all">
+<span class="w-1.5 h-1.5 rounded-full bg-[#00f0ff]"></span>
+<span class="">FICÇÃO CIENTÍFICA</span>
+<span class="opacity-75 text-[10px]">(01)</span>
+</button>
+<!-- DISTOPIA CHIP -->
+<button class="whitespace-nowrap flex items-center gap-1.5 px-2.5 py-1 bg-[#ff007f]/10 border border-[#ff007f] text-[#ff007f] font-label-sm text-label-sm font-bold hover:bg-[#ff007f]/20 transition-all">
+<span class="w-1.5 h-1.5 rounded-full bg-[#ff007f]"></span>
+<span class="">DISTOPIA</span>
+<span class="opacity-75 text-[10px]">(01)</span>
+</button>
+<!-- FILOSOFIA CHIP -->
+<button class="whitespace-nowrap flex items-center gap-1.5 px-2.5 py-1 bg-[#a855f7]/10 border border-[#a855f7] text-[#a855f7] font-label-sm text-label-sm font-bold hover:bg-[#a855f7]/20 transition-all">
+<span class="w-1.5 h-1.5 rounded-full bg-[#a855f7]"></span>
+<span class="">FILOSOFIA</span>
+<span class="opacity-75 text-[10px]">(01)</span>
+</button>
+<!-- HISTÓRIA CHIP -->
+<button class="whitespace-nowrap flex items-center gap-1.5 px-2.5 py-1 bg-[#ffb800]/10 border border-[#ffb800] text-[#ffb800] font-label-sm text-label-sm font-bold hover:bg-[#ffb800]/20 transition-all">
+<span class="w-1.5 h-1.5 rounded-full bg-[#ffb800]"></span>
+<span class="">HISTÓRIA</span>
+<span class="opacity-75 text-[10px]">(01)</span>
+</button>
+</div>
+</section>
+<!-- ================= BOOKS FEED: MOBILE CODEX CARDS ================= -->
+<section class="space-y-4 pt-1">
+<div class="flex items-center justify-between font-label-sm text-label-sm text-on-surface-variant">
+<span class="">CODEX_STREAM // VOLUMES_ATIVOS</span>
+<span class="">ORDEM: CLASSIFICAÇÃO ▼</span>
+</div>
+<!-- CARD 1: NEUROMANCER -->
+<article class="bg-surface-container-low border border-outline-variant hover:border-tertiary-container transition-all duration-200">
+<!-- Card Header Strip -->
+<div class="px-3 py-2 bg-surface-container border-b border-outline-variant flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="font-code-dense text-code-dense text-primary-container">#0842-CYB</span>
+<span class="text-outline-variant">/</span>
+<!-- Category Badge: Cyberpunk (Neon Green) -->
+<span class="font-label-sm text-label-sm px-2 py-0.5 border border-[#39ff14] text-[#39ff14] bg-[#39ff14]/10 uppercase font-bold tracking-wider">
+              CYBERPUNK
+            </span>
+</div>
+<span class="font-label-sm text-label-sm text-tertiary-container flex items-center gap-1">
+<span class="inline-block w-1.5 h-1.5 bg-tertiary-container rounded-full animate-ping"></span>
+            ARQUIVADO
+          </span>
+</div>
+<!-- Card Body -->
+<div class="p-3">
+<div class="flex gap-3">
+<!-- Book Cover Container -->
+<div class="relative w-20 h-28 flex-shrink-0 bg-surface-container-high border border-outline-variant overflow-hidden group">
+<img class="w-full h-full object-cover grayscale contrast-125 hover:grayscale-0 transition-all duration-300" data-alt="A gritty cyberpunk book cover concept featuring neon green laser grids and high-contrast digital circuit boards over an ominous Tokyo cityscape at night. The visual aesthetic is intensely dark and saturated with luminous phosphor accents, strictly honoring minimalist cyberpunk literature framing with pitch black and acidic green accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcn0ugp9_NLF354WxQf1eatGHLbi-s3PsgJCnKbXrFQI_nPBcA5dn5feDdjlXvlBS2Vv09pEQmyRTPyKvrYuBfIyXBofqPchiD9zBZBG6-DemRNAoGAwSSArwKmJfwAnnxjfg0SKARIPzkMRGOqQnBuS8jsXLmy1ZdY0jox-_w-mXVBVA0HXt4PVOkT4Vmm3WAGU1Ubr7l8ApEyn8tMtOgGgGXRR2rn2fG_2KFAiw">
+<div class="absolute bottom-0 left-0 right-0 bg-background/80 text-[9px] font-label-sm text-center text-primary-container py-0.5">
+                1984 [EUA]
+              </div>
+</div>
+<!-- Meta & Info -->
+<div class="flex-1 flex flex-col justify-between">
+<div>
+<div class="flex items-start justify-between">
+<div>
+<h2 class="font-headline-sm text-headline-sm font-bold text-on-surface leading-tight">
+                      Neuromancer
+                    </h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant font-medium">
+                      William Gibson
+                    </p>
+</div>
+<span class="font-title-md text-title-md font-bold text-[#39ff14] tracking-tight">
+                    5.0 ★
+                  </span>
+</div>
+<!-- Futuristic Segmented Rating Cells (5 bars) -->
+<div class="flex items-center gap-1 mt-1.5">
+<span class="h-1.5 w-4 bg-[#39ff14] rounded-none"></span>
+<span class="h-1.5 w-4 bg-[#39ff14] rounded-none"></span>
+<span class="h-1.5 w-4 bg-[#39ff14] rounded-none"></span>
+<span class="h-1.5 w-4 bg-[#39ff14] rounded-none"></span>
+<span class="h-1.5 w-4 bg-[#39ff14] rounded-none shadow-[0_0_6px_#39ff14]"></span>
+</div>
+</div>
+<!-- Telemetry Tag -->
+<div class="font-label-sm text-label-sm text-outline mt-2">
+                CLASSIFICAÇÃO: MATRIZ // DECKER NEURAL
+              </div>
+</div>
+</div>
+<!-- Critique Snippet Frame -->
+<div class="mt-3 p-2.5 bg-surface-container-lowest border-l-2 border-[#39ff14] text-on-surface-variant font-code-dense text-code-dense leading-relaxed">
+<span class="text-[#39ff14] font-bold">SYS:CRÍTICA &gt;</span> "A bíblia do ciberespaço. Prosa afiada como lâmina de monofilamento; estabeleceu a sintaxe visual e conceitual de toda a distopia algorítmica moderna."
+          </div>
+<!-- Action Footer -->
+<div class="mt-3 pt-2 border-t border-outline-variant flex items-center justify-between font-label-sm text-label-sm">
+<div class="text-on-surface-variant flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[15px] text-outline" data-icon="schedule">schedule</span>
+<span class="">LIDO EM: 2049.04.12</span>
+</div>
+<button class="flex items-center gap-1 text-[#39ff14] hover:text-white font-bold transition-colors">
+<span class="">[ VER CRÍTICA ]</span>
+<span class="material-symbols-outlined text-[14px]" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+</article>
+<!-- CARD 2: DUNA -->
+<article class="bg-surface-container-low border border-outline-variant hover:border-primary-container transition-all duration-200">
+<!-- Card Header Strip -->
+<div class="px-3 py-2 bg-surface-container border-b border-outline-variant flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="font-code-dense text-code-dense text-primary-container">#0843-SCI</span>
+<span class="text-outline-variant">/</span>
+<!-- Category Badge: Ficção Científica (Cyan) -->
+<span class="font-label-sm text-label-sm px-2 py-0.5 border border-[#00f0ff] text-[#00f0ff] bg-[#00f0ff]/10 uppercase font-bold tracking-wider">
+              FICÇÃO CIENTÍFICA
+            </span>
+</div>
+<span class="font-label-sm text-label-sm text-primary-container flex items-center gap-1">
+<span class="inline-block w-1.5 h-1.5 bg-primary-container rounded-full"></span>
+            ARQUIVADO
+          </span>
+</div>
+<!-- Card Body -->
+<div class="p-3">
+<div class="flex gap-3">
+<!-- Book Cover Container -->
+<div class="relative w-20 h-28 flex-shrink-0 bg-surface-container-high border border-outline-variant overflow-hidden group">
+<img class="w-full h-full object-cover grayscale contrast-125 hover:grayscale-0 transition-all duration-300" data-alt="An atmospheric science fiction book cover illustration portraying colossal desert sand dunes under dual moons with glowing cyan atmospheric haze. High tech holographic HUD coordinates overlay the dramatic arid landscape, with intense cinematic contrast and subtle cyan luminescent reflections." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCkGteROaAFgmyjOrmUKhJ00JitIyKIv3bTFxLyhEJetW07zDuvKb6b3d75Ufa-DYnZDzcBXu3zf1RuUjQ-hgTJT9zk4E2KytKD6NgEm6cRaAdmik66Gcpt9VHaDcfyKuAAEoU6Hn3lzZ8S9Tw1TLmJ8cGZ_bK2jAvVCUesH42tG3I__ZsaFlaPf0TqMtW0qd_VsqnQur0oA6KXGHcL017WXJytxIaZsJsCkYYsDpY">
+<div class="absolute bottom-0 left-0 right-0 bg-background/80 text-[9px] font-label-sm text-center text-primary-container py-0.5">
+                1965 [EUA]
+              </div>
+</div>
+<!-- Meta & Info -->
+<div class="flex-1 flex flex-col justify-between">
+<div>
+<div class="flex items-start justify-between">
+<div>
+<h2 class="font-headline-sm text-headline-sm font-bold text-on-surface leading-tight">
+                      Duna
+                    </h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant font-medium">
+                      Frank Herbert
+                    </p>
+</div>
+<span class="font-title-md text-title-md font-bold text-[#00f0ff] tracking-tight">
+                    4.9 ★
+                  </span>
+</div>
+<!-- Futuristic Segmented Rating Cells (5 bars) -->
+<div class="flex items-center gap-1 mt-1.5">
+<span class="h-1.5 w-4 bg-[#00f0ff] rounded-none"></span>
+<span class="h-1.5 w-4 bg-[#00f0ff] rounded-none"></span>
+<span class="h-1.5 w-4 bg-[#00f0ff] rounded-none"></span>
+<span class="h-1.5 w-4 bg-[#00f0ff] rounded-none"></span>
+<span class="h-1.5 w-4 bg-[#00f0ff]/40 rounded-none"></span>
+</div>
+</div>
+<!-- Telemetry Tag -->
+<div class="font-label-sm text-label-sm text-outline mt-2">
+                CLASSIFICAÇÃO: ECOLOGIA POLÍTICA // ARRAKIS
+              </div>
+</div>
+</div>
+<!-- Critique Snippet Frame -->
+<div class="mt-3 p-2.5 bg-surface-container-lowest border-l-2 border-[#00f0ff] text-on-surface-variant font-code-dense text-code-dense leading-relaxed">
+<span class="text-[#00f0ff] font-bold">SYS:CRÍTICA &gt;</span> "Construção de mundo e ecologia política sem precedentes. A especiaria como metáfora de poder, escassez e determinismo genético absoluto."
+          </div>
+<!-- Action Footer -->
+<div class="mt-3 pt-2 border-t border-outline-variant flex items-center justify-between font-label-sm text-label-sm">
+<div class="text-on-surface-variant flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[15px] text-outline" data-icon="schedule">schedule</span>
+<span class="">LIDO EM: 2049.03.18</span>
+</div>
+<button class="flex items-center gap-1 text-[#00f0ff] hover:text-white font-bold transition-colors">
+<span class="">[ VER CRÍTICA ]</span>
+<span class="material-symbols-outlined text-[14px]" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+</article>
+<!-- CARD 3: 1984 -->
+<article class="bg-surface-container-low border border-outline-variant hover:border-secondary-container transition-all duration-200">
+<!-- Card Header Strip -->
+<div class="px-3 py-2 bg-surface-container border-b border-outline-variant flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="font-code-dense text-code-dense text-secondary">#0844-DIS</span>
+<span class="text-outline-variant">/</span>
+<!-- Category Badge: Distopia (Magenta) -->
+<span class="font-label-sm text-label-sm px-2 py-0.5 border border-[#ff007f] text-[#ff007f] bg-[#ff007f]/10 uppercase font-bold tracking-wider">
+              DISTOPIA
+            </span>
+</div>
+<span class="font-label-sm text-label-sm text-secondary flex items-center gap-1">
+<span class="inline-block w-1.5 h-1.5 bg-[#ff007f] rounded-full"></span>
+            ARQUIVADO
+          </span>
+</div>
+<!-- Card Body -->
+<div class="p-3">
+<div class="flex gap-3">
+<!-- Book Cover Container -->
+<div class="relative w-20 h-28 flex-shrink-0 bg-surface-container-high border border-outline-variant overflow-hidden group">
+<img class="w-full h-full object-cover grayscale contrast-125 hover:grayscale-0 transition-all duration-300" data-alt="A stark dystopian book cover art piece showing an ominous glowing eye silhouette composed of geometric surveillance scanlines and barbed wire against an ultra-dark urban brutalist wall. High contrast neon magenta glowing accents pierce through the deep carbon shadows, rendering an intense and oppressive surveillance state mood." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCy48o1Yalx6YdoOwV6o4HVuWzlhhipc4u0gWt8R9C0nYOIWbmwevJhsAWt1za9gkEkCJFAuD2kDBhiZqoAqmEfy8IP7Co3KCUSQgW2EWGglK68MIIaY6oHHHDtbZ406SqEUJ56mFSgytfEMcdR2eZmOfXrURWUekdc6ieUtRA0cg6-e2aLuGKD-dNxVNrUYjWhTTI0hKJlDz7etYG3MUCDeiqy2nM7GUz84WCka3A">
+<div class="absolute bottom-0 left-0 right-0 bg-background/80 text-[9px] font-label-sm text-center text-secondary py-0.5">
+                1949 [UK]
+              </div>
+</div>
+<!-- Meta & Info -->
+<div class="flex-1 flex flex-col justify-between">
+<div>
+<div class="flex items-start justify-between">
+<div>
+<h2 class="font-headline-sm text-headline-sm font-bold text-on-surface leading-tight">
+                      1984
+                    </h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant font-medium">
+                      George Orwell
+                    </p>
+</div>
+<span class="font-title-md text-title-md font-bold text-[#ff007f] tracking-tight">
+                    4.8 ★
+                  </span>
+</div>
+<!-- Futuristic Segmented Rating Cells (5 bars) -->
+<div class="flex items-center gap-1 mt-1.5">
+<span class="h-1.5 w-4 bg-[#ff007f] rounded-none"></span>
+<span class="h-1.5 w-4 bg-[#ff007f] rounded-none"></span>
+<span class="h-1.5 w-4 bg-[#ff007f] rounded-none"></span>
+<span class="h-1.5 w-4 bg-[#ff007f] rounded-none"></span>
+<span class="h-1.5 w-4 bg-[#ff007f]/40 rounded-none"></span>
+</div>
+</div>
+<!-- Telemetry Tag -->
+<div class="font-label-sm text-label-sm text-outline mt-2">
+                CLASSIFICAÇÃO: TELESCELAS // OCEANIA
+              </div>
+</div>
+</div>
+<!-- Critique Snippet Frame -->
+<div class="mt-3 p-2.5 bg-surface-container-lowest border-l-2 border-[#ff007f] text-on-surface-variant font-code-dense text-code-dense leading-relaxed">
+<span class="text-[#ff007f] font-bold">SYS:CRÍTICA &gt;</span> "Vigilância ubíqua e novilíngua. Uma dissecação cirúrgica do autoritarismo e da destruição deliberada da semântica humana."
+          </div>
+<!-- Action Footer -->
+<div class="mt-3 pt-2 border-t border-outline-variant flex items-center justify-between font-label-sm text-label-sm">
+<div class="text-on-surface-variant flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[15px] text-outline" data-icon="schedule">schedule</span>
+<span class="">LIDO EM: 2049.01.05</span>
+</div>
+<button class="flex items-center gap-1 text-[#ff007f] hover:text-white font-bold transition-colors">
+<span class="">[ VER CRÍTICA ]</span>
+<span class="material-symbols-outlined text-[14px]" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+</article>
+</section>
+<!-- PWA DIAGNOSTIC FOOTER INFO -->
+<footer class="pt-4 pb-2 border-t border-outline-variant text-center font-code-dense text-code-dense text-outline">
+<div class="flex items-center justify-center gap-2">
+<span class="">STORAGE: 142/5000 ENTRIES</span>
+<span class="">•</span>
+<span class="">SECURITY: ENCRYPTED LOCALDB</span>
+</div>
+<div class="mt-1 text-[10px] text-outline-variant">
+        LIBRARYTRIX PROTOCOL v4.1.0 • PWA OFFLINE READY
+      </div>
+</footer>
+</main>
+<!-- ================= POPUP MODAL: CRIAR / NOVA CATEGORIA (CYBER HUD MODAL) ================= -->
+<dialog class="fixed inset-0 z-50 p-4 m-auto bg-transparent backdrop:bg-background/80 backdrop:backdrop-blur-sm max-w-sm w-full" id="new-cat-modal">
+<div class="bg-surface-container-lowest border-2 border-primary-container p-4 shadow-2xl relative">
+<!-- Reticle corner dots -->
+<div class="absolute -top-1 -left-1 w-2.5 h-2.5 bg-primary-container"></div>
+<div class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-primary-container"></div>
+<div class="absolute -bottom-1 -left-1 w-2.5 h-2.5 bg-primary-container"></div>
+<div class="absolute -bottom-1 -right-1 w-2.5 h-2.5 bg-primary-container"></div>
+<!-- Header -->
+<div class="flex items-center justify-between pb-3 border-b border-outline-variant">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary-container text-[18px]" data-icon="add_circle">add_circle</span>
+<span class="font-headline-sm text-headline-sm font-bold text-primary">CRIAR CATEGORIA</span>
+</div>
+<button class="text-outline hover:text-secondary font-label-sm text-label-sm font-bold" id="close-modal">
+          [ FECHAR_X ]
+        </button>
+</div>
+<!-- Form Body -->
+<div class="py-4 space-y-4 font-body-sm text-body-sm">
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">
+            SYS:NOME_DA_CATEGORIA &gt;
+          </label>
+<input class="w-full bg-surface-container border border-outline text-on-surface px-3 py-2 font-label-sm text-label-sm focus:border-primary-container focus:outline-none focus:ring-1 focus:ring-primary-container" placeholder="Ex: Biopunk, Horror Cósmico..." type="text">
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">
+            SELETOR DE COR NEON PHOSPHOR:
+          </label>
+<div class="grid grid-cols-5 gap-2 pt-1">
+<button class="h-8 bg-[#39ff14]/20 border-2 border-[#39ff14] flex items-center justify-center text-[10px] text-[#39ff14] font-bold" type="button">CYB</button>
+<button class="h-8 bg-[#00f0ff]/20 border-2 border-[#00f0ff] flex items-center justify-center text-[10px] text-[#00f0ff] font-bold shadow-[0_0_8px_#00f0ff]" type="button">SCI</button>
+<button class="h-8 bg-[#a855f7]/20 border border-[#a855f7] flex items-center justify-center text-[10px] text-[#a855f7] font-bold" type="button">FIL</button>
+<button class="h-8 bg-[#ff007f]/20 border border-[#ff007f] flex items-center justify-center text-[10px] text-[#ff007f] font-bold" type="button">DIS</button>
+<button class="h-8 bg-[#ffb800]/20 border border-[#ffb800] flex items-center justify-center text-[10px] text-[#ffb800] font-bold" type="button">HIS</button>
+</div>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">
+            PREFIXO DE PROTOCOLO // IDENTIFICADOR:
+          </label>
+<input class="w-full bg-surface-container border border-outline text-outline px-3 py-1.5 font-label-sm text-label-sm" readonly="" type="text" value="ARCHIVE_ID // ">
+</div>
+</div>
+<!-- Footer Buttons -->
+<div class="pt-3 border-t border-outline-variant flex items-center justify-end gap-2">
+<button class="px-3 py-1.5 bg-surface-container text-on-surface font-label-sm text-label-sm hover:text-white" id="cancel-modal">
+          CANCELAR
+        </button>
+<button class="px-4 py-1.5 bg-primary-container text-background font-label-sm text-label-sm font-bold neon-glow-cyan active:scale-95">
+          [ REGISTRAR NO BANCO ]
+        </button>
+</div>
+</div>
+</dialog>
+<!-- ================= BOTTOM NAVIGATION BAR (MANDATORY SHARED COMPONENT) ================= -->
+<!-- Contextual Active: 'Catálogo' is the active primary repository tab -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-1 bg-surface-dim dark:bg-surface-dim border-t border-outline-variant dark:border-outline-variant shadow-2xl">
+<!-- Destination 1: Catálogo (ACTIVE) -->
+<a class="flex flex-col items-center justify-center text-primary-container dark:text-primary-container font-label-sm text-label-sm font-bold border-t-2 border-primary-container dark:border-primary-container pt-1 pb-1 flex-1 active:scale-95 transition-transform duration-100" href="#catalogo">
+<span class="material-symbols-outlined text-[20px]" data-icon="menu_book">menu_book</span>
+<span class="tracking-wider mt-0.5">Catálogo</span>
+</a>
+<!-- Destination 2: Categorias -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant font-label-sm text-label-sm pt-1 pb-1 flex-1 hover:text-primary dark:hover:text-primary transition-colors duration-150 active:scale-95 transition-transform duration-100" href="#categorias">
+<span class="material-symbols-outlined text-[20px]" data-icon="category">category</span>
+<span class="tracking-wider mt-0.5">Categorias</span>
+</a>
+<!-- Destination 3: Ranking -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant font-label-sm text-label-sm pt-1 pb-1 flex-1 hover:text-primary dark:hover:text-primary transition-colors duration-150 active:scale-95 transition-transform duration-100" href="#ranking">
+<span class="material-symbols-outlined text-[20px]" data-icon="leaderboard">leaderboard</span>
+<span class="tracking-wider mt-0.5">Ranking</span>
+</a>
+<!-- Destination 4: Perfil -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant font-label-sm text-label-sm pt-1 pb-1 flex-1 hover:text-primary dark:hover:text-primary transition-colors duration-150 active:scale-95 transition-transform duration-100" href="#perfil">
+<span class="material-symbols-outlined text-[20px]" data-icon="person">person</span>
+<span class="tracking-wider mt-0.5">Perfil</span>
+</a>
+</nav>
+<!-- Lightweight Vanilla JS for Modal Interaction -->
+<script>
+    const modal = document.getElementById('new-cat-modal');
+    const openBtn = document.getElementById('open-new-cat-modal');
+    const closeBtn = document.getElementById('close-modal');
+    const cancelBtn = document.getElementById('cancel-modal');
+
+    if (openBtn && modal) {
+      openBtn.addEventListener('click', () => {
+        modal.showModal();
+      });
+    }
+
+    const closeModal = () => {
+      if (modal) modal.close();
+    };
+
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+  </script>
+
+
+</body></html>
