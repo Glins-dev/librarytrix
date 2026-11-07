@@ -201,7 +201,7 @@ describe('storageService — CRUD, Validações, Isolamento, Telemetria e Export
   it('15. deve gerar o próximo ID_ARQUIVO sequencial e normalizar buscas ignorando acentos nos 4 campos (RF12)', () => {
     const { books } = loadLocal('user_search_norm');
     const nextId = nextArchiveId(books, 'CYB');
-    expect(nextId).toBe('ID_ARQUIVO // 0843-CYB');
+    expect(nextId).toBe('ID_ARQUIVO // 0992-CYB');
 
     const query = normalize('ficcao');
     const matched = books.filter((b) => normalize(b.category).includes(query));
