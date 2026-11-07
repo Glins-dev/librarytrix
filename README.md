@@ -1,5 +1,6 @@
 # LIBRARYTRIX // SISTEMA_ARQUIVO (DB-01)
 
+![CI Status](https://github.com/Glins-dev/librarytrix/actions/workflows/ci.yml/badge.svg)
 ![Versão](https://img.shields.io/badge/version-1.1.0-00f0ff?style=flat-square&labelColor=08080c)
 ![Build](https://img.shields.io/badge/build-passing-39ff14?style=flat-square&labelColor=08080c)
 ![Licença](https://img.shields.io/badge/license-MIT-a855f7?style=flat-square&labelColor=08080c)
@@ -102,6 +103,8 @@ Para aplicar as regras de segurança do banco de dados no Firebase, utilize o ar
 | Comando | Descrição |
 |---------|-----------|
 | `npm run dev` | Inicia o servidor Vite com Hot Module Replacement (HMR) em `http://localhost:5173`. |
+| `npm test` | Executa a suíte completa de **23 testes unitários automatizados** (`vitest run`) cobrindo `storageService` e `authService`. |
+| `npm run test:watch` | Executa o Vitest em modo interativo (*watch mode*) durante o desenvolvimento. |
 | `npm run typecheck` | Executa o compilador TypeScript (`tsc --noEmit`) em modo estrito para verificação de tipos. |
 | `npm run build` | Compila TypeScript (`tsc -b`), gera o bundle otimizado de produção em `dist/` e o Service Worker PWA. |
 | `npm run preview` | Serve a versão compilada de produção localmente para validação final. |
