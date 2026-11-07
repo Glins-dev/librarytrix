@@ -1,14 +1,17 @@
 import { describe, expect, it } from 'vitest';
 import {
+  PBKDF2_ITERATIONS,
+  PBKDF2_KDF_ID,
   evaluatePassword,
   getOperatorInitials,
   getStoredSession,
+  hashLegacySha256WithSalt,
   loginOperator,
   logoutOperator,
   registerOperator,
 } from '../authService';
 
-describe('authService — Registro, Hash SHA-256 + Salt, Login, Força de Senha e Sessão', () => {
+describe('authService — Registro, PBKDF2 (>= 210.000 iterações), Login, Força de Senha e Sessão', () => {
   it('1. deve registrar um novo usuário local com sucesso e gerar um UID único (RF01)', async () => {
     const user = await registerOperator('OPERADOR_ALPHA', 'alpha@librarytrix.io', 'Cyber@2026');
 
@@ -99,6 +102,51 @@ describe('authService — Registro, Hash SHA-256 + Salt, Login, Força de Senha 
 
     await logoutOperator();
     expect(getStoredSession()).toBeNull();
+  });
+
+  it('9. deve utilizar PBKDF2-SHA256 com >= 210.000 iterações (OWASP) ao derivar a chave de senha (Issue #03 / RNF03)', async () => {
+    expect(PBKDF2_ITERATIONS).toBeGreaterThanOrEqual(210_000);
+    await registerOperator('OPERADOR_PBKDF2', 'pbkdf2@librarytrix.io', 'StrongKey#2026');
+
+    const parsed = JSON.parse(localStorage.getItem('librarytrix_users_v1')!) as Array<{
+      kdf: string;
+      iterations: number;
+      passwordHash: string;
+    }>;
+    expect(parsed[0].kdf).toBe(PBKDF2_KDF_ID);
+    expect(parsed[0].iterations).toBeGreaterThanOrEqual(210_000);
+    expect(parsed[0].passwordHash).toMatch(/^[0-9a-f]{64}$/);
+  });
+
+  it('10. deve migrar automaticamente contas locais legadas (SHA-256) para PBKDF2 no primeiro login bem-sucedido (Issue #03)', async () => {
+    const salt = '0123456789abcdef0123456789abcdef';
+    const legacyHash = await hashLegacySha256WithSalt('LegacyPass#2026', salt);
+
+    localStorage.setItem(
+      'librarytrix_users_v1',
+      JSON.stringify([
+        {
+          uid: 'op_legacy000001',
+          email: 'legado@librarytrix.io',
+          displayName: 'OPERADOR_LEGADO',
+          salt,
+          passwordHash: legacyHash,
+          createdAt: '2026-01-01T00:00:00.000Z',
+        },
+      ]),
+    );
+
+    const logged = await loginOperator('legado@librarytrix.io', 'LegacyPass#2026');
+    expect(logged.uid).toBe('op_legacy000001');
+
+    const updatedUsers = JSON.parse(localStorage.getItem('librarytrix_users_v1')!) as Array<{
+      kdf: string;
+      iterations: number;
+      passwordHash: string;
+    }>;
+    expect(updatedUsers[0].kdf).toBe(PBKDF2_KDF_ID);
+    expect(updatedUsers[0].iterations).toBe(PBKDF2_ITERATIONS);
+    expect(updatedUsers[0].passwordHash).not.toBe(legacyHash);
   });
 });
 
