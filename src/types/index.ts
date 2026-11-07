@@ -2,9 +2,18 @@ export type BookStatus = 'CRITICADO' | 'ARQUIVADO' | 'LENDO' | 'PENDENTE';
 
 export const BOOK_STATUSES: BookStatus[] = ['CRITICADO', 'ARQUIVADO', 'LENDO', 'PENDENTE'];
 
+export interface OperatorUser {
+  uid: string;
+  email: string;
+  displayName: string;
+  createdAt: string;
+}
+
 export interface Book {
   /** Formato `ID_ARQUIVO // 0842-CYB` */
   id: string;
+  /** UID do proprietário do registro */
+  userId?: string;
   title: string;
   author: string;
   /** Nome da categoria (referência a Category.name) */
@@ -24,6 +33,8 @@ export interface Book {
 
 export interface Category {
   id: string;
+  /** UID do proprietário da categoria */
+  userId?: string;
   name: string;
   /** Cor Neon Phosphor em hexadecimal */
   color: string;

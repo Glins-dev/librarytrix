@@ -67,7 +67,7 @@ run_issue_branch "feature/issue-06-design-system-cyberpunk" \
 
 run_issue_branch "feature/issue-07-tipos-e-persistencia" \
   "feat(db): implementar servico de persistencia firebase e storage local (Closes #7)" \
-  src/types/ src/utils.ts src/services/
+  src/types/ src/utils.ts src/services/ firestore.rules
 
 run_issue_branch "feature/issue-08-crud-livros" \
   "feat(books): implementar cadastro edicao e exclusao de livros (Closes #8)" \
@@ -99,7 +99,7 @@ run_issue_branch "feature/issue-12-telemetria-dinamica" \
 
 run_issue_branch "feature/issue-13-filtros-e-busca-ptbr" \
   "feat(search): implementar busca multicriterio e filtros combinados em pt-br (Closes #13)" \
-  src/components/Header.tsx src/components/Sidebar.tsx src/components/FilterBar.tsx src/components/BottomNav.tsx src/components/Footer.tsx
+  src/components/AuthTerminal.tsx src/components/Header.tsx src/components/Sidebar.tsx src/components/FilterBar.tsx src/components/BottomNav.tsx src/components/Footer.tsx
 
 run_issue_branch "feature/issue-14-ranking-e-exportacao" \
   "feat(ranking): adicionar ranqueamento por nota e exportacao json (Closes #14)" \

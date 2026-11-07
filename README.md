@@ -10,6 +10,7 @@
 Catálogo de leitura e críticas em estilo **Terminal HUD cyberpunk** (100% em Português — PT-BR). PWA responsivo (desktop + mobile) com persistência em Firebase Firestore e **fallback automático em `localStorage`** — funciona imediatamente após clonar, sem configurar nada.
 
 ## Funcionalidades
+- **Autenticação Multiusuário e Isolamento de Contas (`AuthTerminal`):** Login e cadastro de operadores em PT-BR via **Firebase Auth** ou cofre local seguro com hash **`SHA-256` + salt** (`Web Crypto API`), indicador de força de senha em barras neon (`FRACA`, `MÉDIA`, `FORTE`), bloqueio contra força bruta e isolamento total do acervo por usuário (`users/{uid}/books` e `librarytrix_books_${uid}`).
 - CRUD de livros (`ID_ARQUIVO // 0842-CYB`, nota 0.0–5.0, status, telemetryTag, crítica).
 - Categorias dinâmicas com cor Neon Phosphor **ou código hexadecimal customizado** (seletor visual + preview da etiqueta) e sufixo de protocolo (`+ NOVA CATEGORIA`, `ALT+N`).
 - **Exclusão de categorias** com confirmação `CONFIRMAR EXCLUSÃO`; livros vinculados são reatribuídos automaticamente à categoria `GERAL` (`#849495`).
@@ -18,6 +19,7 @@ Catálogo de leitura e críticas em estilo **Terminal HUD cyberpunk** (100% em P
 - Ordenação: maior nota, crítica recente, ano de publicação, título A-Z.
 - Terminal de crítica `TERMINAL DE CRÍTICA V4.0 // LIMITE: 1000 CARACTERES`: limite máximo de 1000 caracteres, contador `CARACTERES: XXX / 1000` (amarelo > 900, magenta em 1000), `CTRL+ENTER`.
 - Telemetria em tempo real (`REGISTROS // TOTAL`, `MÉTRICA // GERAL` ou por Categoria, `ÚLTIMO REGISTRO // ADIÇÃO` e `DADOS // DOMINÂNCIA`) e exportação `.json` (`[ SALVAR PACOTE DE DADOS ]`).
+- Regras de segurança do banco em `firestore.rules` garantindo acesso exclusivo ao proprietário (`request.auth.uid == userId`) e validação de `critique.size() <= 1000`.
 - PWA instalável com suporte offline.
 
 ## Setup
@@ -58,7 +60,7 @@ librarytrix/
 | Documento | Conteúdo |
 |-----------|----------|
 | [project-charter.md](docs/project-charter.md) | Termo de Abertura |
-| [requisitos.md](docs/requisitos.md) | RF01–RF16 e RNF01–RNF12 |
+| [requisitos.md](docs/requisitos.md) | RF01–RF19 e RNF01–RNF16 |
 | [casos-de-uso.md](docs/casos-de-uso.md) | Casos de uso |
 | [user-stories.md](docs/user-stories.md) | Histórias + BDD/Gherkin |
 | [arquitetura-der.md](docs/arquitetura-der.md) | C4, DER e fluxo de telas (Mermaid) |
