@@ -1,6 +1,9 @@
-import type { Category, ViewKey } from '../types';
+import { getOperatorInitials, getOperatorNodeId } from '../services/authService';
+import type { Category, OperatorUser, ViewKey } from '../types';
 
 interface Props {
+  user: OperatorUser;
+  onLogout: () => void;
   searchQuery: string;
   onSearchChange: (v: string) => void;
   searchRef: React.RefObject<HTMLInputElement | null>;
@@ -16,7 +19,19 @@ const NAV: { key: ViewKey; label: string }[] = [
   { key: 'profile', label: 'MÉTRICAS' },
 ];
 
-export default function Header({ searchQuery, onSearchChange, searchRef, view, onView, onNewBook }: Props) {
+export default function Header({
+  user,
+  onLogout,
+  searchQuery,
+  onSearchChange,
+  searchRef,
+  view,
+  onView,
+  onNewBook,
+}: Props) {
+  const initials = getOperatorInitials(user.displayName);
+  const nodeId = getOperatorNodeId(user.uid);
+
   return (
     <header className="flex justify-between items-center w-full px-4 lg:px-gutter-desktop h-14 bg-surface-container-lowest border-b border-outline-variant fixed top-0 z-40 left-0 right-0 gap-3">
       <div className="flex items-center gap-4 min-w-0">
@@ -29,8 +44,8 @@ export default function Header({ searchQuery, onSearchChange, searchRef, view, o
             <span className="hidden lg:inline px-1.5 py-0.5 bg-primary-container/10 border border-primary-container/40 text-primary-container text-label-sm font-label-sm">
               SISTEMA_ARQUIVO
             </span>
-            <span className="lg:hidden text-label-sm font-label-sm text-outline tracking-widest mt-0.5">
-              CODEX PWA v4.1 • NÓ #0842
+            <span className="lg:hidden text-label-sm font-label-sm text-outline tracking-widest mt-0.5 truncate max-w-[180px]">
+              {user.displayName.toUpperCase()} • NÓ {nodeId}
             </span>
           </div>
         </div>
@@ -67,7 +82,7 @@ export default function Header({ searchQuery, onSearchChange, searchRef, view, o
         </div>
       </div>
 
-      <nav className="hidden lg:flex items-center gap-6">
+      <nav className="hidden xl:flex items-center gap-6">
         {NAV.map((n) => (
           <button
             key={n.key}
@@ -104,12 +119,33 @@ export default function Header({ searchQuery, onSearchChange, searchRef, view, o
         >
           <span className="material-symbols-outlined">search</span>
         </button>
-        <div className="hidden lg:flex items-center gap-2 px-2 py-1 bg-surface-container border border-outline-variant">
-          <div className="w-6 h-6 bg-surface-container-high border border-primary-container/40 flex items-center justify-center text-primary-container text-label-sm font-label-sm">
-            OP
+
+        {/* Identificação do Operador Autenticado */}
+        <div
+          className="hidden lg:flex items-center gap-2 px-2 py-1 bg-surface-container border border-outline-variant"
+          title={`Logado como ${user.displayName} (${user.email})`}
+        >
+          <div className="w-6 h-6 bg-surface-container-high border border-primary-container/40 flex items-center justify-center text-primary-container text-label-sm font-label-sm font-bold shrink-0">
+            {initials}
           </div>
-          <span className="text-label-sm font-label-sm text-on-surface">OPERADOR_0842</span>
+          <span className="text-label-sm font-label-sm text-on-surface uppercase max-w-[140px] truncate">
+            {user.displayName}
+          </span>
         </div>
+
+        {/* Botão Encerrar Sessão (Cabeçalho) */}
+        <button
+          type="button"
+          onClick={onLogout}
+          title="Encerrar sessão do operador"
+          aria-label="Encerrar sessão"
+          className="px-2.5 py-1.5 bg-surface-container hover:bg-[#ff007f]/15 border border-outline-variant hover:border-[#ff007f] text-on-surface-variant hover:text-[#ff007f] text-label-sm font-label-sm tracking-wider flex items-center gap-1 transition-colors"
+        >
+          <span className="material-symbols-outlined text-[15px]">logout</span>
+          <span className="hidden xl:inline">[ ENCERRAR SESSÃO ]</span>
+          <span className="xl:hidden hidden sm:inline">SAIR</span>
+        </button>
+
         <button
           onClick={onNewBook}
           className="bg-primary-container text-surface-container-lowest hover:bg-primary-fixed-dim px-3 py-1.5 text-label-md font-label-md tracking-wider flex items-center gap-1 font-bold transition-all duration-150"

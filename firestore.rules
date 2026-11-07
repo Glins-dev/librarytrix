@@ -1,0 +1,55 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Função auxiliar: garante que o usuário está autenticado e acessa apenas o próprio nó (UID)
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    // Função auxiliar: valida integridade do documento Book e limite estrito de 1000 caracteres na crítica
+    function isValidBook(data) {
+      return data.title is string
+        && data.title.size() > 0
+        && data.author is string
+        && data.author.size() > 0
+        && data.rating is number
+        && data.rating >= 0.0
+        && data.rating <= 5.0
+        && (!('critique' in data) || (data.critique is string && data.critique.size() <= 1000));
+    }
+
+    // Função auxiliar: valida integridade do documento Category e formato hexadecimal
+    function isValidCategory(data) {
+      return data.name is string
+        && data.name.size() > 0
+        && data.color is string
+        && data.color.matches('^#([0-9A-Fa-f]{3}){1,2}$')
+        && data.suffix is string
+        && data.suffix.size() >= 2
+        && data.suffix.size() <= 4;
+    }
+
+    // Isolamento estrito por usuário: users/{userId}/books e users/{userId}/categories
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+
+      match /books/{bookId} {
+        allow read, delete: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidBook(request.resource.data);
+      }
+
+      match /categories/{categoryId} {
+        allow read, delete: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidCategory(request.resource.data);
+      }
+    }
+
+    // Bloqueia qualquer acesso fora da árvore isolada de usuários
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+

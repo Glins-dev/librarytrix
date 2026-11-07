@@ -15,39 +15,58 @@ C4Context
 flowchart TB
   subgraph Browser
     UI["React + Tailwind (SPA)"]
+    AUTH_UI["AuthTerminal.tsx (Login/Registro)"]
     SW["Service Worker (vite-plugin-pwa)"]
-    LS[("localStorage")]
+    WC["Web Crypto API (SHA-256 + Salt)"]
+    LS[("localStorage Isolado por UID")]
+    UI --> AUTH_SVC["authService.ts"]
+    AUTH_UI --> AUTH_SVC
+    AUTH_SVC --> WC
+    AUTH_SVC --> LS
     UI --> SVC["storageService.ts"]
     SVC --> LS
     UI -.cache offline.-> SW
   end
-  SVC -->|"se .env configurado"| FS[("Cloud Firestore")]
+  AUTH_SVC -->|"se .env configurado"| FBA[("Firebase Authentication")]
+  SVC -->|"users/{uid}/books e categories"| FS[("Cloud Firestore + firestore.rules")]
 ```
 
 ## C4 — Nível 3: Componentes
 ```mermaid
 flowchart LR
-  App --> Header & Sidebar & TelemetryStrip & FilterBar & BookCard & RankingView & BottomNav & Footer
-  App --> NewBookModal & NewCategoryModal & CritiqueModal
+  App --> AuthTerminal & Header & Sidebar & TelemetryStrip & FilterBar & BookCard & RankingView & BottomNav & Footer
+  App --> NewBookModal & NewCategoryModal & CritiqueModal & ConfirmCategoryDelete
   NewBookModal --> CritiqueEditor
   CritiqueModal --> CritiqueEditor
   BookCard --> RatingBar
   RankingView --> RatingBar
+  App --> authService --> firebase
   App --> storageService --> firebase
 ```
 
-## DER (Firestore)
+## DER (Firestore e Isolamento por Conta)
 ```mermaid
 erDiagram
+  USER ||--o{ CATEGORY : possui
+  USER ||--o{ BOOK : cataloga
   CATEGORY ||--o{ BOOK : classifica
+  USER {
+    string uid PK
+    string email UK
+    string displayName
+    string passwordHash "SHA-256 + salt (local) ou Firebase Auth"
+    string createdAt
+  }
   CATEGORY {
     string id PK
+    string userId FK "USER.uid"
     string name
     string color
     string suffix
   }
   BOOK {
     string id PK "ID_ARQUIVO // 0842-CYB"
+    string userId FK "USER.uid"
     string title
     string author
     string category FK "CATEGORY.name"
@@ -61,12 +80,14 @@ erDiagram
     string syncDate
   }
 ```
-> No Firestore, o ID de documento é o `id` sanitizado (`/` e espaços → `_`); o `id` de exibição permanece no campo.
+> No Firestore, os documentos ficam isolados em `/users/{userId}/books/{bookId}` e `/users/{userId}/categories/{categoryId}`, protegidos por `firestore.rules` (`request.auth != null && request.auth.uid == userId`). No fallback local, as chaves são prefixadas por UID (`librarytrix_books_${uid}` e `librarytrix_categories_${uid}`).
 
 ## Fluxo de Telas
 ```mermaid
 flowchart LR
-  Catalogo["Catálogo / CATÁLOGO"] <--> Categorias["Categorias (mobile)"]
+  Auth["AuthTerminal (Login / Registro)"] -->|"Autenticado"| Catalogo["Catálogo / CATÁLOGO"]
+  Catalogo -->|"[ ENCERRAR SESSÃO ]"| Auth
+  Catalogo <--> Categorias["Categorias (mobile)"]
   Catalogo <--> Ranking["Ranking / RANKING"]
   Catalogo <--> Perfil["Perfil / MÉTRICAS"]
   Catalogo --> NovoLivro{{Modal Novo/Editar Livro}}
@@ -75,8 +96,8 @@ flowchart LR
   Ranking --> Critica
 ```
 
-## Estratégia de Persistência
-1. Boot: `loadLocal()` lê `localStorage` (pré-carregado com os 6 livros-semente).
-2. Se o Firebase estiver configurado, `syncFromCloud()` busca `books`/`categories`; nuvem vazia → envia o seed local.
-3. Escritas: `localStorage` sempre; Firestore em seguida. Falha → estado `OFFLINE` (dados locais preservados).
+## Estratégia de Persistência e Segurança
+1. **Autenticação:** `authService.ts` utiliza Firebase Auth quando `.env` está presente; sem `.env`, utiliza o cofre local com `window.crypto.subtle.digest('SHA-256', ...)` + *salt* exclusivo por operador (senhas nunca são salvas em texto puro).
+2. **Isolamento de Dados:** `loadLocal(uid)` lê e grava em `librarytrix_books_${uid}` e `librarytrix_categories_${uid}`. Cada nova conta recebe seu próprio seed inicial independente.
+3. **Sincronização Nuvem:** `syncFromCloud(uid)` sincroniza `/users/{uid}/books` e `/users/{uid}/categories`, com regras de segurança em `firestore.rules` validando propriedade do `uid` e `critique.size() <= 1000`.
 

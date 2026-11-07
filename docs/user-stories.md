@@ -162,7 +162,41 @@ Funcionalidade: Exportar JSON
 Funcionalidade: Modo offline
   Cenário: Sem .env
     Dado que não há variáveis do Firebase
-    Quando abro o app
-    Então vejo os 6 livros-semente e os dados persistem no localStorage
+    Quando crio uma conta ou faço login no modo local
+    Então minha senha é armazenada apenas como hash SHA-256 com salt e meu acervo persiste isolado no localStorage
+```
+
+## US09 — Autenticação e Isolamento de Conta de Usuário
+**Como** operador do sistema, **quero** criar minha própria conta com senha forte e autenticar-me de forma segura, **para** que meu acervo de livros e categorias fique totalmente isolado de outros usuários.
+```gherkin
+Funcionalidade: Autenticação e Isolamento Multiusuário
+  Cenário: Bloqueio de acesso quando não autenticado
+    Dado que não há sessão ativa no sistema
+    Quando acesso a aplicação
+    Então visualizo exclusivamente o "AuthTerminal" com as abas "[ AUTENTICAR OPERADOR ]" e "[ REGISTRAR NOVO OPERADOR ]"
+
+  Cenário: Registro de novo operador com validação de força de senha
+    Dado que estou na aba "[ REGISTRAR NOVO OPERADOR ]"
+    Quando preencho o codinome "OPERADOR_NEON", o e-mail "neon@librarytrix.io" e a senha "Cyber@2026"
+    Então o indicador de força exibe "[ FORTE ]" na cor "#39ff14"
+    E ao confirmar a senha e clicar em "[ CRIAR CONTA E INICIALIZAR ACERVO ]"
+    Então sou autenticado, vejo "OPERADOR_NEON" e as iniciais "ON" no cabeçalho e na Sidebar
+    E meu acervo inicial é criado em chaves exclusivas do meu UID
+
+  Cenário: Rejeição de senha fraca no cadastro
+    Dado que estou na aba "[ REGISTRAR NOVO OPERADOR ]"
+    Quando digito a senha "12345"
+    Então o indicador de força exibe "[ FRACA ]" na cor "#ff007f"
+    E ao tentar submeter vejo a mensagem de erro exigindo mínimo de 8 caracteres, maiúscula, minúscula e número ou símbolo
+
+  Cenário: Isolamento estrito de dados entre duas contas
+    Dado que o operador "ana@librarytrix.io" cadastrou o livro " Solaris" e clicou em "[ ENCERRAR SESSÃO ]"
+    Quando o operador "bruno@librarytrix.io" faz login em sua própria conta
+    Então "bruno@librarytrix.io" visualiza apenas os livros e categorias do seu próprio UID e não vê as alterações de "ana@librarytrix.io"
+
+  Cenário: Encerramento de sessão (Logout)
+    Dado que estou autenticado no catálogo
+    Quando clico em "[ ENCERRAR SESSÃO ]" no cabeçalho ou na Sidebar
+    Então os dados em memória são limpos imediatamente e retorno para a tela "AuthTerminal"
 ```
 
