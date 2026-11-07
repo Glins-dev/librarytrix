@@ -1,78 +1,176 @@
-# Casos de Uso — Librarytrix
+# Especificação Formal de Casos de Uso — Librarytrix
 
-**Ator principal:** Operador (leitor). **Sistema:** Librarytrix.
+---
+
+## 1. Catálogo de Atores
+
+| Ator | Tipo | Descrição e Responsabilidades |
+|------|------|-------------------------------|
+| **Visitante (Operador Não Autenticado)** | Primário (Humano) | Usuário que acessa a aplicação sem sessão ativa. Visualiza exclusivamente o terminal de segurança `AuthTerminal`, podendo criar uma nova conta (`[ REGISTRAR NOVO OPERADOR ]`) ou autenticar-se (`[ AUTENTICAR OPERADOR ]`). |
+| **Operador Autenticado (Leitor)** | Primário (Humano) | Usuário com sessão ativa validada por UID. Possui acesso total ao seu acervo isolado de livros e categorias, telemetria, busca multicritério, ranking, exportação JSON e encerramento de sessão. |
+| **Serviço de Autenticação e Persistência (`authService` / `storageService`)** | Secundário (Sistema / Cloud) | Subsistema híbrido que integra o **Firebase Authentication / Cloud Firestore** (`users/{uid}/**`) e o provedor criptográfico local (`Web Crypto API SHA-256 + salt` e `localStorage` prefixado por `uid`). |
+
+---
+
+## 2. Diagrama Geral de Casos de Uso
 
 ```mermaid
 flowchart LR
-  O((Operador))
-  O --> UC10[UC10 Autenticar e isolar conta]
-  O --> UC1[UC01 Cadastrar livro]
-  O --> UC2[UC02 Editar/Excluir livro]
-  O --> UC3[UC03 Registrar crítica 1000 caracteres]
-  O --> UC4[UC04 Criar categoria]
-  O --> UC8[UC08 Excluir categoria]
-  O --> UC5[UC05 Filtrar e pesquisar]
-  O --> UC6[UC06 Consultar ranking]
-  O --> UC7[UC07 Exportar JSON]
-  O --> UC9[UC09 Monitorar telemetria HUD]
+  V(["Visitante (Não Autenticado)"])
+  O(["Operador Autenticado (Leitor)"])
+  FS[("Firebase Auth & Firestore / Cofre Local SHA-256")]
+
+  V --> UC01["UC01 — Autenticar e Registrar Operador com Isolamento de Conta"]
+  UC01 -.->|"Concede Sessão Ativa (UID)"| O
+
+  O --> UC02["UC02 — Cadastrar Livro com Crítica Literária (Limite 1000 Caracteres)"]
+  O --> UC03["UC03 — Editar, Visualizar Crítica Completa e Excluir Livro"]
+  O --> UC04["UC04 — Criar e Excluir Categorias com Cor Hexadecimal Personalizada"]
+  O --> UC05["UC05 — Buscar por 4 Campos (Multicritério sem Acentos) e Filtrar Acervo"]
+  O --> UC06["UC06 — Monitorar os 4 Blocos de Telemetria Superior (TelemetryStrip)"]
+  O --> UC07["UC07 — Consultar Ranking Geral e Exportar Pacote de Dados JSON"]
+  O --> UC01
+
+  UC01 --> FS
+  UC02 --> FS
+  UC03 --> FS
+  UC04 --> FS
+  UC07 --> FS
 ```
 
-## UC01 — Cadastrar livro
-- **Pré-condição:** app carregado.
-- **Fluxo principal:** 1) Operador clica `[ + NOVO LIVRO ]`. 2) Preenche título, autor, categoria, ano, país, nota, status, capa e tag. 3) Opcionalmente escreve a crítica. 4) Confirma com `[ SALVAR CRÍTICA ]`. 5) Sistema gera `ID_ARQUIVO // NNNN-SUF`, grava e exibe o card.
-- **Fluxo alternativo A1:** Operador cancela em `[ FECHAR_X ]` → nada é gravado.
-- **Fluxo de exceção E1:** título/autor vazio, nota fora de 0–5 ou ano inválido → mensagem `ERRO:` e o modal permanece aberto.
-- **Pós-condição:** livro persistido (Firestore e/ou `localStorage`).
+---
 
-## UC02 — Editar/Excluir livro
-- **Principal:** Operador clica no ícone de edição → altera campos → confirma; ou clica em excluir → confirma o diálogo → livro removido.
-- **Alternativo:** Operador recusa a confirmação de exclusão → nada muda.
-- **Exceção:** falha no Firestore → mantém alteração local e marca sincronia `OFFLINE`.
+## 3. Detalhamento dos Casos de Uso
 
-## UC03 — Registrar e visualizar crítica (limite máximo de 1000 caracteres)
-- **Principal (Cadastro/Edição):** 1) Operador abre o formulário de Novo/Editar Livro. 2) Digita a crítica no campo `TERMINAL DE CRÍTICA V4.0 // LIMITE: 1000 CARACTERES` acompanhando o contador `CARACTERES: XXX / 1000`. 3) Confirma em `[ SALVAR CRÍTICA ]` (ou `CTRL+ENTER`). 4) Sistema grava o livro com a crítica e atualiza `syncDate`.
-- **Alternativo (Visualização completa):** Operador clica em `[ VER CRÍTICA COMPLETA ]` no card do livro → sistema abre o modal de leitura com o texto integral da crítica e opção `[ EDITAR NO REGISTRO ]`.
-- **Exceção:** ao atingir 1000 caracteres o campo bloqueia novas entradas (contador magenta `#ff007f`; amarelo `#ffb800` acima de 900).
+### UC01 — Autenticar e Registrar Operador com Isolamento de Conta
+- **Atores:** Visitante (Não Autenticado), Operador Autenticado, Serviço de Autenticação (`authService.ts`).
+- **Requisitos Relacionados:** `[RF01]`, `[RF02]`, `[RNF03]`, `[RNF05]`.
+- **Pré-condições:** A aplicação está carregada no navegador; quando não há sessão ativa, o acesso ao catálogo é bloqueado pelo `AuthTerminal`.
+- **Fluxo Principal (Cadastro de Novo Operador):**
+  1. O Visitante seleciona a aba `[ REGISTRAR NOVO OPERADOR ]` no `AuthTerminal`.
+  2. O Visitante informa o **Nome de Operador / Codinome**, o **E-mail** e digita a **Chave de Acesso (Senha)**.
+  3. O sistema avalia a senha em tempo real e atualiza o medidor em barras neon (`[ FRACA ]` em `#ff007f`, `[ MÉDIA ]` em `#ffb800` ou `[ FORTE ]` em `#39ff14`) e o checklist dos 4 requisitos (mínimo de 8 caracteres, 1 maiúscula, 1 minúscula e 1 número ou símbolo).
+  4. O Visitante repete a senha no campo **Confirmar Chave de Acesso** e aciona `[ CRIAR CONTA E INICIALIZAR ACERVO ]`.
+  5. O sistema cria a conta no Firebase Auth (ou gera *salt* de 16 bytes + hash `SHA-256` via `window.crypto.subtle.digest` no cofre local), inicializa o acervo isolado do novo `uid` com as 5 categorias padrão e 6 livros-semente (`users/{uid}/**` e `librarytrix_books_${uid}`) e abre o catálogo exibindo o nome real e as iniciais do operador no cabeçalho e na Sidebar.
+- **Fluxo Alternativo A1 — Login de Operador Existente:**
+  1. Na aba `[ AUTENTICAR OPERADOR ]`, o usuário informa E-mail e Senha e clica em `[ INICIAR SESSÃO DO OPERADOR ]`.
+  2. O sistema valida as credenciais e carrega exclusivamente os livros e categorias vinculados ao `uid` daquele operador.
+- **Fluxo Alternativo A2 — Mostrar/Ocultar Senha:**
+  1. O usuário clica no botão `[ MOSTRAR ]` / `[ OCULTAR ]` ao lado do campo de senha para inspecionar os caracteres digitados.
+- **Fluxo Alternativo A3 — Encerrar Sessão (Logout):**
+  1. O Operador Autenticado clica em `[ ENCERRAR SESSÃO ]` no cabeçalho, na Sidebar ou na aba Sistema/Métricas.
+  2. O sistema encerra a sessão, limpa imediatamente os arrays de livros, categorias e filtros em memória e retorna à tela `AuthTerminal`.
+- **Fluxos de Exceção:**
+  - **E1 (Senha Fraca ou Confirmação Divergente):** O sistema impede a submissão e exibe alerta em PT-BR (`ERRO DE SEGURANÇA` ou `ERRO DE VALIDAÇÃO`).
+  - **E2 (E-mail Já Cadastrado):** O sistema exibe `ERRO DE REGISTRO: Este endereço de e-mail já está cadastrado no sistema.`
+  - **E3 (Credenciais Inválidas / Bloqueio por Força Bruta):** Após 5 tentativas incorretas consecutivas, o sistema bloqueia temporariamente a conta por 60 segundos (`BLOQUEIO DE SEGURANÇA: Excesso de tentativas falhas`).
+- **Pós-condições:** O operador autenticado acessa apenas seu próprio acervo isolado; nenhuma senha é armazenada em texto puro.
 
-## UC04 — Criar categoria
-- **Principal:** Operador abre `+ NOVA CATEGORIA` (ou `ALT+N`) → informa nome em `NOME DA CATEGORIA >` → escolhe um preset neon **ou digita um código hexadecimal** (ex.: `#FF0055`) / usa o seletor visual `<input type="color">`, vendo a `PRÉ-VISUALIZAÇÃO DA ETIQUETA` em tempo real → define sufixo (2–4 letras) → `[ REGISTRAR NO BANCO ]`.
-- **Alternativo:** Código de 3 dígitos (`#0FF`) é normalizado para 6 (`#00FFFF`).
-- **Exceção:** nome duplicado/vazio, hexadecimal fora de `/^#([0-9A-F]{3}){1,2}$/i` ou sufixo inválido → `ERRO:` exibido e nada é gravado.
+---
 
-## UC05 — Filtrar e pesquisar
-- **Principal:** Operador seleciona categoria (sidebar/chips), nota mínima, nacionalidade e/ou digita em `BUSCAR >` (Desktop ou Mobile, atalho `CTRL+K` / `⌘K`) → o sistema normaliza acentos e maiúsculas/minúsculas e verifica se o termo está contido no **título**, **autor**, **nacionalidade original** ou **categoria**, atualizando a lista em tempo real.
-- **Alternativo:** Operador clica em `[ X ]` dentro do input de busca para limpar rapidamente o termo digitado.
-- **Exceção:** nenhum resultado → exibe estado vazio estilizado com a mensagem `NENHUM REGISTRO ENCONTRADO PARA A BUSCA ATUAL` e o botão `[ LIMPAR FILTROS ]`.
+### UC02 — Cadastrar Livro com Crítica Literária (Limite de 1000 Caracteres)
+- **Atores:** Operador Autenticado, Serviço de Persistência (`storageService.ts`).
+- **Requisitos Relacionados:** `[RF03]`, `[RF05]`, `[RF06]`, `[RF07]`, `[RNF04]`, `[RNF05]`.
+- **Pré-condições:** Operador autenticado no sistema.
+- **Fluxo Principal:**
+  1. O Operador clica no botão `[ + NOVO LIVRO ]` no cabeçalho.
+  2. O sistema abre o modal `NOVO REGISTRO DE LIVRO`.
+  3. O Operador preenche **Título**, **Autor**, seleciona a **Categoria**, informa **Ano de Lançamento**, **Nacionalidade Original**, **Nota (`0.0` a `5.0`)**, **Status de Leitura**, **URL da Capa** e **Tag de Telemetria**.
+  4. No campo `TERMINAL DE CRÍTICA V4.0 // LIMITE: 1000 CARACTERES`, o Operador digita sua crítica literária acompanhando o contador em tempo real `CARACTERES: XXX / 1000`.
+  5. O Operador confirma clicando em `[ SALVAR CRÍTICA ]` (ou pressionando `CTRL+ENTER`).
+  6. O sistema gera o identificador `ID_ARQUIVO // NNNN-SUF`, associa o `userId` do operador, persiste o livro em `librarytrix_books_${uid}` e `users/{uid}/books`, fecha o modal e atualiza o Bento Grid e os 4 blocos de telemetria.
+- **Fluxo Alternativo A1 — Cancelamento:**
+  1. O Operador clica em `[ FECHAR_X ]` ou `[ CANCELAR ]`; o modal é fechado sem gravar alterações.
+- **Fluxos de Exceção:**
+  - **E1 (Campos Obrigatórios ou Nota Inválida):** Caso título/autor estejam vazios ou a nota esteja fora do intervalo `0.0`–`5.0`, o sistema exibe alerta `ERRO:` e mantém o modal aberto.
+  - **E2 (Limite de 1000 Caracteres Atingido):** Ao passar de 900 caracteres, o contador muda para amarelo (`#ffb800`); ao atingir 1000 caracteres, muda para magenta (`#ff007f`) e bloqueia a inserção de novos caracteres (`maxLength={1000}` e validação `critique.length <= 1000`).
+- **Pós-condições:** Livro gravado no acervo isolado do operador com crítica de no máximo 1000 caracteres.
 
-## UC06 — Consultar ranking
-- **Principal:** Operador abre `RANKING` → vê livros por nota (`RANKING // CLASSIFICAÇÃO GERAL`) com medalhas #01–#03.
+---
 
-## UC07 — Exportar JSON
-- **Principal:** Operador clica `EXPORTAR JSON`/`[ SALVAR PACOTE DE DADOS ]` → navegador baixa `librarytrix-backup-AAAA-MM-DD.json` com livros e categorias.
+### UC03 — Editar, Visualizar Crítica Completa e Excluir Livro
+- **Atores:** Operador Autenticado, Serviço de Persistência.
+- **Requisitos Relacionados:** `[RF04]`, `[RF07]`, `[RF08]`.
+- **Pré-condições:** Existir ao menos um livro cadastrado na conta do operador.
+- **Fluxo Principal (Leitura e Edição):**
+  1. No card do livro, o Operador clica em `[ VER CRÍTICA COMPLETA ]`.
+  2. O sistema exibe o modal `TERMINAL DE CRÍTICA V4.0 // LIMITE: 1000 CARACTERES` com o texto integral da crítica, nota, categoria e data `REGISTRADO EM:`.
+  3. O Operador clica em `[ EDITAR NO REGISTRO ]` (ou diretamente no ícone `edit` do card).
+  4. O sistema abre o modal de edição preenchido com os dados do livro; o Operador altera os campos desejados e salva em `[ SALVAR CRÍTICA ]`.
+- **Fluxo Alternativo A1 — Exclusão de Livro:**
+  1. O Operador clica no ícone `delete` no card do livro.
+  2. O sistema solicita confirmação (`Excluir "<Título>" do acervo?`).
+  3. Ao confirmar, o livro é removido do `localStorage` e da subcoleção `users/{uid}/books` do Firestore, recalculando a telemetria imediatamente.
+- **Fluxo de Exceção E1 — Falha de Rede na Nuvem:**
+  1. Se o Firestore estiver inacessível no momento da edição/exclusão, a alteração é preservada localmente e o indicador de rodapé muda para `OFFLINE`.
 
-## UC08 — Excluir categoria
-- **Pré-condição:** existe ao menos uma categoria diferente de `GERAL`.
-- **Principal:** 1) Operador clica no ícone `delete` / `[X]` da categoria (Sidebar, chips mobile ou aba Categorias). 2) Sistema exibe `CONFIRMAR EXCLUSÃO // Deseja remover esta categoria?` com a quantidade de livros afetados. 3) Operador confirma em `[ CONFIRMAR_EXCLUSÃO ]`. 4) Sistema remove a categoria, reatribui livros vinculados à categoria `GERAL` (`#849495`, criada automaticamente se necessário) e atualiza contadores e filtros.
-- **Alternativo:** Operador cancela → nada muda.
-- **Exceção:** a categoria `GERAL` não pode ser excluída; falha no Firestore → alteração mantida localmente e sincronia `OFFLINE`.
-- **Pós-condição:** nenhum livro fica sem categoria válida.
+---
 
-## UC09 — Monitorar telemetria superior (TelemetryStrip)
-- **Pré-condição:** app carregado no Catálogo ou Perfil/Métricas.
-- **Principal:** 1) O sistema calcula e exibe os 4 blocos de telemetria:
-  - **Bloco 1 (`REGISTROS // TOTAL` | `SIS:ATIVO`):** total absoluto de volumes no acervo (`X Vol`), com `Codex Principal` e total de categorias ativas (ou itens filtrados) no rodapé.
-  - **Bloco 2 (`MÉTRICA // GERAL` ou `MÉTRICA // [CATEGORIA]`):** quando `TODOS` está ativo, exibe a média global do site (`Média Global do Site` e `AVALIADOS: X%`); quando uma categoria é selecionada na Sidebar ou nos Filter Chips, recalcula a média apenas daquela categoria (`X Vols na Categoria`) e aplica a cor Hexadecimal da categoria ao valor principal, destaque e barra inferior.
-  - **Bloco 3 (`ÚLTIMO REGISTRO // ADIÇÃO` | `RECÉM ADICIONADO`):** exibe o título truncado do último livro cadastrado, seu autor à esquerda e a categoria + nota (`X.X ★`) na cor da categoria à direita.
-  - **Bloco 4 (`DADOS // DOMINÂNCIA` | `MAIOR CATEGORIA`):** exibe a categoria com mais livros, seu percentual no acervo, `X Vols registrados` e a 2ª categoria (ou total de categorias), estilizados com a cor Hexadecimal da categoria dominante.
-- **Exceções / Estados vazios:**
-  - Categoria selecionada sem livros → Bloco 2 exibe `0.0 ★ MÉDIA` e `Sem registros`.
-  - Acervo sem nenhum livro → Bloco 3 exibe `NENHUM REGISTRO` e `Aguardando indexação...`.
+### UC04 — Criar e Excluir Categorias com Código Hexadecimal Personalizado
+- **Atores:** Operador Autenticado, Serviço de Persistência.
+- **Requisitos Relacionados:** `[RF09]`, `[RF10]`, `[RNF02]`, `[RNF09]`.
+- **Pré-condições:** Operador autenticado.
+- **Fluxo Principal (Criação com Cor Hexadecimal):**
+  1. O Operador aciona `[ + NOVA CATEGORIA ]` (na Sidebar, nos Filter Chips ou via atalho `ALT+N`).
+  2. Informa o nome em `NOME DA CATEGORIA >` e o sufixo de protocolo (2 a 4 letras).
+  3. Escolhe uma cor clicando em um dos presets Neon Phosphor, **digitando manualmente um código hexadecimal** (ex.: `#FF0055`) ou selecionando no `<input type="color">` sincronizado.
+  4. O sistema atualiza instantaneamente a `PRÉ-VISUALIZAÇÃO DA ETIQUETA` com a cor escolhida.
+  5. O Operador clica em `[ REGISTRAR NO BANCO ]`; o sistema valida o formato `/^#([0-9A-F]{3}){1,2}$/i`, normaliza códigos de 3 dígitos (`#0FF` → `#00FFFF`) e salva a categoria na conta do usuário.
+- **Fluxo Alternativo A1 — Exclusão de Categoria com Migração para `GERAL`:**
+  1. O Operador clica no botão de exclusão (`delete` / `[X]`) de uma categoria na Sidebar, nos Filter Chips ou na aba Categorias.
+  2. O sistema abre o modal `CONFIRMAR EXCLUSÃO // Deseja remover esta categoria?` informando quantos livros estão vinculados a ela.
+  3. O Operador confirma em `[ CONFIRMAR_EXCLUSÃO ]`.
+  4. O sistema exclui a categoria e reatribui automaticamente todos os livros afetados para a categoria `GERAL` (`#849495`), criando-a se necessário.
+- **Fluxos de Exceção:**
+  - **E1 (Hexadecimal Inválido ou Nome Duplicado):** Exibe mensagem de erro (`ERRO: cor hexadecimal inválida (ex.: #00F0FF).` ou `ERRO: categoria já existe.`) e impede a gravação.
+  - **E2 (Proteção da Categoria `GERAL`):** A categoria padrão `GERAL` não exibe botão de exclusão.
+- **Pós-condições:** Categorias atualizadas com cores aplicadas via `style` inline dinâmico; nenhum livro fica sem categoria válida.
 
-## UC10 — Autenticação e Isolamento de Conta de Usuário
-- **Pré-condição:** operador não autenticado visualiza exclusivamente a tela `AuthTerminal`.
-- **Fluxo principal (Registro):** 1) Operador seleciona a aba `[ REGISTRAR NOVO OPERADOR ]`. 2) Informa Nome de Operador/Codinome, E-mail, Senha (acompanhando o indicador `FRACA` / `MÉDIA` / `FORTE`) e Confirmação de Senha. 3) Clica em `[ CRIAR CONTA E INICIALIZAR ACERVO ]`. 4) O sistema valida os requisitos de segurança da senha, cria a conta no Firebase Auth (ou gera *salt* + hash `SHA-256` no cofre local), inicializa o acervo isolado do UID (`users/{uid}/books` e `users/{uid}/categories` / `librarytrix_books_${uid}`) e libera o acesso ao catálogo exibindo o nome e as iniciais do operador no cabeçalho e na Sidebar.
-- **Fluxo alternativo A1 (Login):** Operador seleciona `[ AUTENTICAR OPERADOR ]`, informa E-mail e Senha e clica em `[ INICIAR SESSÃO DO OPERADOR ]` → o sistema valida as credenciais e carrega apenas os livros e categorias pertencentes àquele `uid`.
-- **Fluxo alternativo A2 (Logout):** Operador clica em `[ ENCERRAR SESSÃO ]` no cabeçalho ou na Sidebar → o sistema limpa imediatamente o estado em memória, encerra a sessão e retorna para o `AuthTerminal`.
-- **Fluxo de exceção E1:** senha com menos de 8 caracteres ou sem maiúscula/minúscula/número-ou-símbolo, confirmação divergente, e-mail já cadastrado ou 5 tentativas inválidas consecutivas → o sistema exibe mensagem de erro em PT-BR e bloqueia o acesso.
-- **Pós-condição:** nenhum operador consegue visualizar ou modificar livros ou categorias de outra conta.
+---
 
+### UC05 — Buscar por 4 Campos (Multicritério sem Acentos) e Filtrar Acervo
+- **Atores:** Operador Autenticado.
+- **Requisitos Relacionados:** `[RF12]`, `[RF13]`, `[RNF08]`.
+- **Pré-condições:** Operador autenticado na visão de Catálogo.
+- **Fluxo Principal:**
+  1. O Operador foca a barra `BUSCAR >` (no cabeçalho Desktop, na barra Mobile ou pressionando `CTRL+K` / `⌘K`) e digita um termo de pesquisa.
+  2. A cada caractere digitado, o sistema normaliza o termo e os campos dos livros (`normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()`) e verifica se o termo está contido em **qualquer um dos 4 campos**:
+     - Nome do Livro (`book.title`)
+     - Nome do Autor (`book.author`)
+     - Nacionalidade Original (`book.originalNationality`)
+     - Categoria (`book.category`)
+  3. O Operador opcionalmente combina a busca textual com os filtros de **Categoria**, **Nota Mínima** (`5.0 ★`, `4.5+ ★`, `4.0+ ★`, `TODOS`) e **Nacionalidade**.
+  4. O Bento Grid e o contador de resultados são atualizados instantaneamente.
+- **Fluxo Alternativo A1 — Limpeza Rápida pelo Botão `[ X ]`:**
+  1. Quando `searchQuery` não está vazio, o Operador clica no botão `[ X ]` dentro do input de busca para limpar o texto e restaurar a listagem imediatamente.
+- **Fluxo de Exceção E1 — Nenhum Registro Encontrado:**
+  1. Caso nenhum livro corresponda aos critérios ativos, o grid renderiza o painel estilizado `NENHUM REGISTRO ENCONTRADO PARA A BUSCA ATUAL` com o botão `[ LIMPAR FILTROS ]`, que redefine todos os filtros e a busca com um clique.
+
+---
+
+### UC06 — Monitorar os 4 Blocos de Telemetria Superior (`TelemetryStrip`)
+- **Atores:** Operador Autenticado.
+- **Requisitos Relacionados:** `[RF11]`, `[RNF08]`.
+- **Pré-condições:** Operador autenticado visualizando o Catálogo ou a aba Métricas.
+- **Fluxo Principal:**
+  1. O sistema processa o acervo do operador em tempo real e renderiza os 4 blocos superiores:
+     - **Bloco 1 (`REGISTROS // TOTAL` | `SIS:ATIVO`):** Exibe o total absoluto de livros da conta (`X Vol`), `Codex Principal` e a quantidade de categorias ativas (ou itens exibidos no filtro atual).
+     - **Bloco 2 (`MÉTRICA // GERAL` ou `MÉTRICA // [CATEGORIA]`):** Quando `TODOS` está selecionado, exibe a média aritmética global de todos os livros (`Média Global do Site` e `AVALIADOS: X%`). Quando uma categoria específica é selecionada, recalcula a média apenas dos livros daquela categoria (`X Vols na Categoria`) e aplica dinamicamente a cor hexadecimal da categoria ao valor principal, texto de destaque e borda inferior.
+     - **Bloco 3 (`ÚLTIMO REGISTRO // ADIÇÃO` | `RECÉM ADICIONADO`):** Exibe o título truncado em 1 linha do último livro cadastrado, seu autor à esquerda e a categoria + nota (`X.X ★`) na cor da categoria à direita.
+     - **Bloco 4 (`DADOS // DOMINÂNCIA` | `MAIOR CATEGORIA`):** Identifica a categoria com maior número de livros no acervo, exibindo seu nome, percentual de dominância, `X Vols registrados` e a 2ª maior categoria, estilizados com a cor hexadecimal da categoria líder.
+- **Fluxos de Exceção / Estados Vazios:**
+  - **E1 (Categoria Selecionada Sem Livros):** O Bloco 2 exibe `0.0 ★ MÉDIA` e `Sem registros`.
+  - **E2 (Acervo Sem Livros):** O Bloco 3 exibe `NENHUM REGISTRO` e `Aguardando indexação...`.
+
+---
+
+### UC07 — Consultar Ranking Geral e Exportar Pacote de Dados JSON
+- **Atores:** Operador Autenticado.
+- **Requisitos Relacionados:** `[RF14]`, `[RF15]`.
+- **Pré-condições:** Operador autenticado.
+- **Fluxo Principal (Ranking):**
+  1. O Operador acessa a visão `RANKING` no cabeçalho ou na barra inferior mobile.
+  2. O sistema exibe a lista `RANKING // CLASSIFICAÇÃO GERAL` ordenada decrescentemente por nota, destacando os 3 primeiros colocados (`#01`, `#02`, `#03`) e permitindo abrir a crítica completa de qualquer obra.
+- **Fluxo Alternativo A1 — Exportação JSON:**
+  1. O Operador clica em `[ SALVAR PACOTE DE DADOS ]` (Sidebar, FilterBar ou aba Sistema).
+  2. O navegador baixa imediatamente o arquivo `librarytrix-backup-AAAA-MM-DD.json` contendo os metadados do operador, suas categorias e seus livros.
