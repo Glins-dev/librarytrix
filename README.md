@@ -1,7 +1,9 @@
 # LIBRARYTRIX // SISTEMA_ARQUIVO (DB-01)
 
-![Versão](https://img.shields.io/badge/version-1.1.0-00f0ff?style=flat-square&labelColor=08080c)
+![CI Status](https://github.com/Glins-dev/librarytrix/actions/workflows/ci.yml/badge.svg)
+![Versão](https://img.shields.io/badge/version-1.2.0-00f0ff?style=flat-square&labelColor=08080c)
 ![Build](https://img.shields.io/badge/build-passing-39ff14?style=flat-square&labelColor=08080c)
+![Testes](https://img.shields.io/badge/tests-34_passed-39ff14?style=flat-square&labelColor=08080c)
 ![Licença](https://img.shields.io/badge/license-MIT-a855f7?style=flat-square&labelColor=08080c)
 ![React](https://img.shields.io/badge/React-18.3-00f0ff?style=flat-square&logo=react&logoColor=white&labelColor=08080c)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.6-39ff14?style=flat-square&logo=typescript&logoColor=white&labelColor=08080c)
@@ -10,7 +12,7 @@
 ![PWA](https://img.shields.io/badge/PWA-Offline_Ready-ff007f?style=flat-square&labelColor=08080c)
 
 > **Catálogo Literário, Crítica Pessoal e Estação de Telemetria em Estilo Cyberpunk Terminal HUD (100% PT-BR).**  
-> Aplicação Web Progressiva (PWA) multiusuário com autenticação segura (**Firebase Auth** + fallback criptográfico local **`SHA-256` + salt**), isolamento estrito de acervo por conta e persistência híbrida **Offline-First** (**Cloud Firestore** + **`localStorage`**).
+> Aplicação Web Progressiva (PWA) multiusuário com autenticação segura (**Firebase Auth** + derivação criptográfica local **`PBKDF2-HMAC-SHA256` com 210.000 iterações + salt**), isolamento estrito de acervo por conta e persistência híbrida **Offline-First** (**Cloud Firestore** + **`localStorage`**).
 
 ---
 
@@ -27,11 +29,11 @@ O **Librarytrix (`SISTEMA_ARQUIVO`)** soluciona esses três pontos ao combinar u
 
 ## 2. Sumário de Funcionalidades: Implementadas vs. Planejadas
 
-### ✅ Funcionalidades Implementadas (`v1.1.0`)
+### ✅ Funcionalidades Implementadas (`v1.2.0`)
 - [x] **Autenticação Multiusuário e Segurança (`AuthTerminal` & `authService`):**
   - Abas `[ AUTENTICAR OPERADOR ]` (Login) e `[ REGISTRAR NOVO OPERADOR ]` (Cadastro com Codinome, E-mail, Senha e Confirmação).
   - Validação de força de senha no frontend (mínimo de 8 caracteres, 1 maiúscula, 1 minúscula e 1 número/símbolo) com medidor visual em barras neon (`FRACA` `#ff007f`, `MÉDIA` `#ffb800`, `FORTE` `#39ff14`) e botão `[ MOSTRAR / OCULTAR ]`.
-  - Integração primária com **Firebase Authentication** e fallback local seguro usando `window.crypto.subtle.digest('SHA-256', ...)` com *salt* exclusivo por operador (nunca armazena senhas em texto puro) + bloqueio contra força bruta (5 tentativas).
+  - Integração primária com **Firebase Authentication** e fallback local seguro usando **`PBKDF2-HMAC-SHA256` (`210.000` iterações via Web Crypto API)** com *salt* exclusivo por operador, migração transparente de contas legadas no primeiro login e bloqueio contra força bruta (5 tentativas).
   - Identificação real do operador logado (nome + iniciais no avatar) e botão `[ ENCERRAR SESSÃO ]` no cabeçalho e na Sidebar com limpeza imediata do estado em memória.
 - [x] **Isolamento Estrito de Dados por Conta (`storageService` & `firestore.rules`):**
   - Subcoleções isoladas no Firestore (`users/{uid}/books` e `users/{uid}/categories`) e chaves isoladas no `localStorage` (`librarytrix_books_${uid}` e `librarytrix_categories_${uid}`).
@@ -102,6 +104,8 @@ Para aplicar as regras de segurança do banco de dados no Firebase, utilize o ar
 | Comando | Descrição |
 |---------|-----------|
 | `npm run dev` | Inicia o servidor Vite com Hot Module Replacement (HMR) em `http://localhost:5173`. |
+| `npm test` | Executa a suíte completa de **23 testes unitários automatizados** (`vitest run`) cobrindo `storageService` e `authService`. |
+| `npm run test:watch` | Executa o Vitest em modo interativo (*watch mode*) durante o desenvolvimento. |
 | `npm run typecheck` | Executa o compilador TypeScript (`tsc --noEmit`) em modo estrito para verificação de tipos. |
 | `npm run build` | Compila TypeScript (`tsc -b`), gera o bundle otimizado de produção em `dist/` e o Service Worker PWA. |
 | `npm run preview` | Serve a versão compilada de produção localmente para validação final. |
@@ -177,6 +181,10 @@ flowchart LR
 
 ---
 
-## 7. Licença
+## 7. Governança, Documentação e Licença
 
-Distribuído sob a licença **MIT**. Desenvolvido por **Guilherme Lins (`Glins-dev`)**.
+- **Índice da Documentação de Engenharia:** [`docs/README.md`](./docs/README.md)
+- **Guia de Contribuição e Git Flow:** [`CONTRIBUTING.md`](./CONTRIBUTING.md)
+- **Histórico de Releases (SemVer):** [`CHANGELOG.md`](./CHANGELOG.md)
+- **Evidências de Auditoria PWA e Acessibilidade:** [`docs/evidencias/pwa-auditoria.md`](./docs/evidencias/pwa-auditoria.md) e [`docs/evidencias/a11y-auditoria.md`](./docs/evidencias/a11y-auditoria.md)
+- **Licença:** Distribuído sob a licença [**MIT**](./LICENSE). Desenvolvido por **Guilherme Lins (`Glins-dev`)**.

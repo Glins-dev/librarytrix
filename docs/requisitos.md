@@ -43,22 +43,22 @@
 
 ---
 
-## 3. Matriz de Rastreabilidade Horizontal
+## 3. Matriz de Rastreabilidade Horizontal (Requisitos × Casos de Uso × Testes Unitários)
 
-| Requisito Funcional | Caso(s) de Uso | User Story (BDD) | Componente(s) / Serviço(s) Principal(is) | Issue no Backlog |
-|---------------------|----------------|------------------|------------------------------------------|------------------|
-| **[RF01]** Autenticação Multiusuário | `UC01` | `US01` | `AuthTerminal.tsx`, `authService.ts`, `Header.tsx`, `Sidebar.tsx` | `#7`, `#13` |
-| **[RF02]** Isolamento de Acervo por Conta | `UC01` | `US01` | `storageService.ts`, `App.tsx`, `firestore.rules` | `#7` |
-| **[RF03]** Cadastro de Livros (`ID_ARQUIVO`) | `UC02` | `US02` | `NewBookModal.tsx`, `storageService.ts` | `#8` |
-| **[RF04]** Edição e Exclusão de Livros | `UC03` | `US02` | `NewBookModal.tsx`, `BookCard.tsx`, `App.tsx` | `#8` |
-| **[RF05]** Listagem em Bento Grid HUD | `UC02`, `UC05` | `US02`, `US05` | `BookCard.tsx`, `App.tsx` | `#11` |
-| **[RF06]** Nota Decimal e Barra 5 Células | `UC02` | `US02` | `RatingBar.tsx`, `BookCard.tsx` | `#11` |
-| **[RF07]** Crítica com Limite de 1000 Chars | `UC02`, `UC03` | `US03` | `CritiqueEditor.tsx`, `NewBookModal.tsx` | `#9` |
-| **[RF08]** Modal de Crítica Completa | `UC03` | `US03` | `CritiqueModal.tsx`, `CritiqueEditor.tsx` | `#9` |
-| **[RF09]** Categorias com Cor Hexadecimal | `UC04` | `US04` | `NewCategoryModal.tsx` | `#10` |
-| **[RF10]** Exclusão de Categoria (`GERAL`) | `UC04` | `US04` | `ConfirmCategoryDelete.tsx`, `storageService.ts` | `#10` |
-| **[RF11]** 4 Blocos de Telemetria Superior | `UC06` | `US06` | `TelemetryStrip.tsx` | `#12` |
-| **[RF12]** Busca Multicritério em 4 Campos | `UC05` | `US05` | `Header.tsx`, `FilterBar.tsx`, `utils.ts`, `App.tsx` | `#13` |
-| **[RF13]** Filtros Combinados | `UC05` | `US05` | `FilterBar.tsx`, `Sidebar.tsx`, `App.tsx` | `#13` |
-| **[RF14]** Ordenação e Ranking Geral | `UC07` | `US07` | `RankingView.tsx`, `FilterBar.tsx` | `#14` |
-| **[RF15]** Exportação JSON e Restauração | `UC07` | `US07` | `storageService.ts`, `Sidebar.tsx`, `App.tsx` | `#14` |
+| Requisito Funcional | Caso(s) de Uso | User Story (BDD) | Componente(s) / Serviço(s) Principal(is) | Suíte de Testes Automatizados (Vitest) | Issue no Backlog |
+|---------------------|----------------|------------------|------------------------------------------|----------------------------------------|------------------|
+| **[RF01]** Autenticação Multiusuário | `UC01` | `US01` | `AuthTerminal.tsx`, `authService.ts`, `Header.tsx`, `Sidebar.tsx` | `src/services/__tests__/authService.test.ts` (Testes 1 a 8) | `#7`, `#13` |
+| **[RF02]** Isolamento de Acervo por Conta | `UC01` | `US01` | `storageService.ts`, `App.tsx`, `firestore.rules` | `src/services/__tests__/storageService.test.ts` (Teste 11) | `#7` |
+| **[RF03]** Cadastro de Livros (`ID_ARQUIVO`) | `UC02` | `US02` | `NewBookModal.tsx`, `storageService.ts` | `src/services/__tests__/storageService.test.ts` (Testes 1, 2 e 15) | `#8` |
+| **[RF04]** Edição e Exclusão de Livros | `UC03` | `US02` | `NewBookModal.tsx`, `BookCard.tsx`, `App.tsx` | `src/services/__tests__/storageService.test.ts` (Testes 3 e 4) | `#8` |
+| **[RF05]** Listagem em Bento Grid HUD | `UC02`, `UC05` | `US02`, `US05` | `BookCard.tsx`, `App.tsx` | `src/services/__tests__/storageService.test.ts` (Testes 1 e 2) | `#11` |
+| **[RF06]** Nota Decimal e Barra 5 Células | `UC02` | `US02` | `RatingBar.tsx`, `BookCard.tsx` | `src/services/__tests__/storageService.test.ts` (Teste 7) | `#11` |
+| **[RF07]** Crítica com Limite de 1000 Chars | `UC02`, `UC03` | `US03` | `CritiqueEditor.tsx`, `NewBookModal.tsx` | `src/services/__tests__/storageService.test.ts` (Testes 5 e 6) | `#9` |
+| **[RF08]** Modal de Crítica Completa | `UC03` | `US03` | `CritiqueModal.tsx`, `CritiqueEditor.tsx` | `src/services/__tests__/storageService.test.ts` (Teste 5) | `#9` |
+| **[RF09]** Categorias com Cor Hexadecimal | `UC04` | `US04` | `NewCategoryModal.tsx` | `src/services/__tests__/storageService.test.ts` (Testes 8 e 9) | `#10` |
+| **[RF10]** Exclusão de Categoria (`GERAL`) | `UC04` | `US04` | `ConfirmCategoryDelete.tsx`, `storageService.ts` | `src/services/__tests__/storageService.test.ts` (Teste 10) | `#10` |
+| **[RF11]** 4 Blocos de Telemetria Superior | `UC06` | `US06` | `TelemetryStrip.tsx` | `src/services/__tests__/storageService.test.ts` (Testes 12 e 13) | `#12` |
+| **[RF12]** Busca Multicritério em 4 Campos | `UC05` | `US05` | `Header.tsx`, `FilterBar.tsx`, `utils.ts`, `App.tsx` | `src/services/__tests__/storageService.test.ts` (Teste 15) | `#13` |
+| **[RF13]** Filtros Combinados | `UC05` | `US05` | `FilterBar.tsx`, `Sidebar.tsx`, `App.tsx` | `src/services/__tests__/storageService.test.ts` (Testes 13 e 15) | `#13` |
+| **[RF14]** Ordenação e Ranking Geral | `UC07` | `US07` | `RankingView.tsx`, `FilterBar.tsx` | `src/services/__tests__/storageService.test.ts` (Teste 12) | `#14` |
+| **[RF15]** Exportação JSON e Restauração | `UC07` | `US07` | `storageService.ts`, `Sidebar.tsx`, `App.tsx` | `src/services/__tests__/storageService.test.ts` (Teste 14) | `#14` |

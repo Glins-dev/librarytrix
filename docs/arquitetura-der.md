@@ -17,7 +17,8 @@ erDiagram
     string email UK "Endereço de e-mail único (normalizado em minúsculas)"
     string displayName "Nome de Operador / Codinome exibido no HUD"
     string salt "Salt criptográfico de 16 bytes (modo local)"
-    string passwordHash "Hash SHA-256 + salt (modo local) ou gerenciado pelo Firebase Auth"
+    string passwordHash "Derivação PBKDF2-SHA256 (210.000 iterações + salt) ou gerenciado pelo Firebase Auth"
+    string kdf "Identificador do KDF (PBKDF2-SHA256-210000)"
     string createdAt "Timestamp ISO-8601 de criação da conta"
   }
 
@@ -46,10 +47,12 @@ erDiagram
   }
 ```
 
-### Regras de Integridade do Modelo de Dados
-1. **Isolamento por Proprietário (`userId`):** Nenhuma consulta ou gravação pode atravessar a fronteira de `USER.uid`. Validado no servidor por `isOwner(userId)` em `firestore.rules`.
+### Regras de Integridade do Modelo de Dados e Limites do Modo Local
+1. **Isolamento por Proprietário (`userId`):** Nenhuma consulta ou gravação pode atravessar a fronteira de `USER.uid`. Validado no servidor por `isOwner(userId)` em `firestore.rules` e testado automaticamente em `src/services/__tests__/firestoreRules.test.ts`.
 2. **Integridade Referencial na Exclusão de Categoria:** Quando uma `CATEGORY` é excluída pelo operador, todos os registros `BOOK` cujo campo `category` aponta para `CATEGORY.name` são migrados atomicamente para a categoria padrão protegida `GERAL` (`color: #849495`, `suffix: GER`).
 3. **Restrição de Domínio da Crítica Literária:** `BOOK.critique` possui comprimento máximo estrito de **1000 caracteres** (`critique.length <= 1000` no cliente e `data.critique.size() <= 1000` no `firestore.rules`).
+4. **Derivação de Chave no Cofre Local (`PBKDF2-HMAC-SHA256`):** Quando o Firebase Auth não está configurado no `.env`, o modo local deriva a chave de senha via Web Crypto API (`PBKDF2`, `SHA-256`, **210.000 iterações** + salt aleatório de 16 bytes, seguindo a recomendação OWASP) e migra automaticamente contas legadas (`SHA-256`) no primeiro login. *Nota arquitetural:* o modo local destina-se a operação single-device/offline; para proteção multi-dispositivo em produção, recomenda-se ativar o Firebase Auth via `.env`.
+5. **Validação Automatizada das Regras Firestore (`firestore.rules`):** As regras são verificadas a cada execução do `npm test` via `src/services/__tests__/firestoreRules.test.ts` (testando bloqueio não autenticado, isolamento cruzado `user_alpha` vs `user_bravo`, limite de 1000 caracteres na crítica e regex hexadecimal de categoria). Para inspeção adicional com o Firebase Local Emulator Suite: `npx firebase emulators:exec --only firestore "npm test"`.
 
 ---
 
