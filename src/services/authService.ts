@@ -13,13 +13,17 @@ const LOCAL_USERS_KEY = 'librarytrix_users_v1';
 const LOCAL_SESSION_KEY = 'librarytrix_session_v1';
 const MAX_FAILED_ATTEMPTS = 5;
 const LOCKOUT_DURATION_MS = 60_000;
+export const PBKDF2_ITERATIONS = 210_000;
+export const PBKDF2_KDF_ID = 'PBKDF2-SHA256-210000';
 
-interface StoredLocalUser {
+export interface StoredLocalUser {
   uid: string;
   email: string;
   displayName: string;
   salt: string;
   passwordHash: string;
+  kdf?: string;
+  iterations?: number;
   createdAt: string;
   failedAttempts?: number;
   lockoutUntil?: number;
@@ -108,10 +112,39 @@ function generateSalt(): string {
 }
 
 /**
- * Calcula o hash SHA-256 da senha combinada com o salt do usuário usando Web Crypto API.
- * Nunca armazena a senha em texto puro.
+ * Deriva a chave criptográfica da senha com salt usando PBKDF2-HMAC-SHA256 (>= 210.000 iterações)
+ * via Web Crypto API (OWASP Password Storage Cheat Sheet). Nunca armazena a senha em texto puro.
  */
-export async function hashPasswordWithSalt(password: string, salt: string): Promise<string> {
+export async function hashPasswordWithSalt(
+  password: string,
+  salt: string,
+  iterations: number = PBKDF2_ITERATIONS,
+): Promise<string> {
+  const encoder = new TextEncoder();
+  const keyMaterial = await window.crypto.subtle.importKey(
+    'raw',
+    encoder.encode(password),
+    { name: 'PBKDF2' },
+    false,
+    ['deriveBits'],
+  );
+  const derivedBits = await window.crypto.subtle.deriveBits(
+    {
+      name: 'PBKDF2',
+      salt: encoder.encode(`librarytrix::${salt}`),
+      iterations,
+      hash: 'SHA-256',
+    },
+    keyMaterial,
+    256,
+  );
+  return Array.from(new Uint8Array(derivedBits), (b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+/**
+ * Calcula o hash legado SHA-256 apenas para migração transparente de contas antigas no primeiro login.
+ */
+export async function hashLegacySha256WithSalt(password: string, salt: string): Promise<string> {
   const payload = new TextEncoder().encode(`${salt}::librarytrix::${password}`);
   const digest = await window.crypto.subtle.digest('SHA-256', payload);
   return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, '0')).join('');
@@ -267,6 +300,8 @@ export async function registerOperator(
     displayName: cleanName,
     salt,
     passwordHash,
+    kdf: PBKDF2_KDF_ID,
+    iterations: PBKDF2_ITERATIONS,
     createdAt,
     failedAttempts: 0,
     lockoutUntil: 0,
@@ -279,7 +314,7 @@ export async function registerOperator(
   return sessionUser;
 }
 
-/** Autentica um operador existente via Firebase Auth ou verificação SHA-256 + salt no banco local. */
+/** Autentica um operador existente via Firebase Auth ou verificação PBKDF2-SHA256 (>= 210k iterações) com migração automática de legado no banco local. */
 export async function loginOperator(email: string, password: string): Promise<OperatorUser> {
   const cleanEmail = email.trim().toLowerCase();
   if (!cleanEmail || !password) {
@@ -312,8 +347,20 @@ export async function loginOperator(email: string, password: string): Promise<Op
     );
   }
 
-  const candidateHash = await hashPasswordWithSalt(password, target.salt);
-  if (candidateHash !== target.passwordHash) {
+  const iterations = target.iterations ?? PBKDF2_ITERATIONS;
+  const pbkdf2Candidate = await hashPasswordWithSalt(password, target.salt, iterations);
+  let isMatch = pbkdf2Candidate === target.passwordHash;
+  let migratedHash = target.passwordHash;
+
+  if (!isMatch && target.kdf !== PBKDF2_KDF_ID) {
+    const legacyCandidate = await hashLegacySha256WithSalt(password, target.salt);
+    if (legacyCandidate === target.passwordHash) {
+      isMatch = true;
+      migratedHash = pbkdf2Candidate;
+    }
+  }
+
+  if (!isMatch) {
     const nextAttempts = (target.failedAttempts ?? 0) + 1;
     const isLocked = nextAttempts >= MAX_FAILED_ATTEMPTS;
     users[idx] = {
@@ -332,7 +379,14 @@ export async function loginOperator(email: string, password: string): Promise<Op
     );
   }
 
-  users[idx] = { ...target, failedAttempts: 0, lockoutUntil: 0 };
+  users[idx] = {
+    ...target,
+    passwordHash: migratedHash,
+    kdf: PBKDF2_KDF_ID,
+    iterations: PBKDF2_ITERATIONS,
+    failedAttempts: 0,
+    lockoutUntil: 0,
+  };
   writeLocalUsers(users);
 
   const sessionUser: OperatorUser = {

@@ -85,7 +85,7 @@ export default function AuthTerminal({ onAuthenticated }: Props) {
           <span className="w-2 h-2 bg-[#39ff14] inline-block" />
           <span className="text-outline hidden md:inline">PROVEDOR:</span>
           <span className="text-[#39ff14]">
-            {isFirebaseConfigured ? 'FIREBASE_AUTH // NUVEM' : 'CRIPTO_SHA256 // COFRE_LOCAL'}
+            {isFirebaseConfigured ? 'FIREBASE_AUTH // NUVEM' : 'PBKDF2_SHA256 // COFRE_LOCAL'}
           </span>
         </div>
       </header>
@@ -113,7 +113,7 @@ export default function AuthTerminal({ onAuthenticated }: Props) {
               </p>
             </div>
             <div className="px-2 py-1 bg-surface-container-lowest border border-outline-variant text-code-dense font-code-dense text-outline shrink-0">
-              SHA-256 + SALT
+              PBKDF2 // 210K
             </div>
           </div>
 
@@ -340,7 +340,7 @@ export default function AuthTerminal({ onAuthenticated }: Props) {
 
       {/* Rodapé de Segurança */}
       <footer className="w-full px-4 lg:px-8 py-2.5 border-t border-outline-variant bg-[#0D0E15] flex flex-wrap items-center justify-between gap-2 text-code-dense font-code-dense text-outline z-20">
-        <span>SEGURANÇA: HASH SHA-256 COM SALT POR OPERADOR</span>
+        <span>SEGURANÇA: PBKDF2-SHA256 (210.000 ITERAÇÕES + SALT)</span>
         <span>ISOLAMENTO: DADOS VINCULADOS AO UID DA CONTA</span>
         <span className="text-[#00F0FF]">STATUS DO SISTEMA: PROTEGIDO</span>
       </footer>
