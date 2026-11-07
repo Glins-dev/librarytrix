@@ -1,0 +1,878 @@
+<!DOCTYPE html><html class="dark" lang="pt-BR"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>LIBRARYTRIX // ARCHIVE_OS - Reading Terminal &amp; Critique Catalog</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&amp;family=Space+Grotesk:wght@600;700&amp;display=swap" rel="stylesheet">
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-error-container": "#ffdad6",
+            "on-tertiary-fixed-variant": "#095300",
+            "primary-fixed": "#7df4ff",
+            "on-error": "#690005",
+            "surface-container-high": "#2a292e",
+            "surface": "#131317",
+            "tertiary-fixed-dim": "#2ae500",
+            "surface-container-lowest": "#0e0e12",
+            "primary": "#dbfcff",
+            "secondary-fixed": "#ffd9e1",
+            "inverse-primary": "#006970",
+            "secondary-container": "#ff4a8d",
+            "on-tertiary-container": "#106e00",
+            "tertiary-container": "#33fb0a",
+            "primary-container": "#00f0ff",
+            "surface-container-low": "#1b1b20",
+            "on-secondary-fixed-variant": "#8f0044",
+            "inverse-surface": "#e4e1e8",
+            "on-secondary-fixed": "#3f001a",
+            "tertiary-fixed": "#79ff5b",
+            "surface-container-highest": "#353439",
+            "error": "#ffb4ab",
+            "on-secondary": "#65002e",
+            "on-tertiary": "#053900",
+            "on-tertiary-fixed": "#022100",
+            "outline": "#849495",
+            "background": "#131317",
+            "outline-variant": "#3b494b",
+            "on-background": "#e4e1e8",
+            "surface-variant": "#353439",
+            "inverse-on-surface": "#303035",
+            "on-primary-fixed-variant": "#004f54",
+            "surface-bright": "#39393e",
+            "surface-dim": "#131317",
+            "on-surface-variant": "#b9cacb",
+            "primary-fixed-dim": "#00dbe9",
+            "on-primary-fixed": "#002022",
+            "on-secondary-container": "#590028",
+            "on-surface": "#e4e1e8",
+            "on-primary-container": "#006970",
+            "secondary": "#ffb1c4",
+            "surface-tint": "#00dbe9",
+            "error-container": "#93000a",
+            "secondary-fixed-dim": "#ffb1c4",
+            "surface-container": "#1f1f24",
+            "on-primary": "#00363a",
+            "tertiary": "#e1ffd1"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "gutter-desktop": "1.5rem",
+            "space-md": "1rem",
+            "space-sm": "0.5rem",
+            "margin": "1rem",
+            "margin-desktop": "2.5rem",
+            "gutter": "1rem",
+            "space-lg": "1.5rem",
+            "gutter-tablet": "1.25rem",
+            "space-xs": "0.25rem",
+            "margin-tablet": "1.5rem",
+            "space-xl": "2.5rem"
+          },
+          "fontFamily": {
+            "headline-lg": ["Space Grotesk"],
+            "headline-sm": ["Space Grotesk"],
+            "title-md": ["JetBrains Mono"],
+            "body-sm": ["JetBrains Mono"],
+            "body-md": ["JetBrains Mono"],
+            "body-lg": ["JetBrains Mono"],
+            "code-dense": ["JetBrains Mono"],
+            "headline-xl-mobile": ["Space Grotesk"],
+            "headline-xl": ["Space Grotesk"],
+            "label-md": ["JetBrains Mono"],
+            "label-sm": ["JetBrains Mono"],
+            "headline-lg-mobile": ["Space Grotesk"],
+            "headline-md": ["Space Grotesk"]
+          },
+          "fontSize": {
+            "headline-lg": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+            "headline-sm": ["20px", { "lineHeight": "28px", "letterSpacing": "0.02em", "fontWeight": "600" }],
+            "title-md": ["16px", { "lineHeight": "24px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+            "body-sm": ["12px", { "lineHeight": "18px", "letterSpacing": "0.02em", "fontWeight": "400" }],
+            "body-md": ["14px", { "lineHeight": "22px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "body-lg": ["16px", { "lineHeight": "26px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "code-dense": ["11px", { "lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "500" }],
+            "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.08em", "fontWeight": "600" }],
+            "label-sm": ["10px", { "lineHeight": "14px", "letterSpacing": "0.12em", "fontWeight": "600" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    /* CRT Scanline & HUD styling */
+    .scanlines {
+      background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0, 240, 255, 0.012) 4px);
+      pointer-events: none;
+    }
+    .hud-glow-cyan {
+      box-shadow: 0 0 10px -2px #00f0ff, inset 0 0 6px -3px #00f0ff;
+    }
+    .text-phosphor-cyan {
+      text-shadow: 0 0 8px rgba(0, 240, 255, 0.6);
+    }
+    .text-phosphor-magenta {
+      text-shadow: 0 0 8px rgba(255, 0, 127, 0.6);
+    }
+    .text-phosphor-green {
+      text-shadow: 0 0 8px rgba(57, 255, 20, 0.6);
+    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0e0e12;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #3b494b;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #00f0ff;
+    }
+  </style>
+</head>
+<body class="bg-surface-container-lowest text-on-surface font-body-md antialiased min-h-screen flex flex-col relative overflow-x-hidden selection:bg-primary-container selection:text-surface-container-lowest">
+<!-- Scanline CRT Effect Overlay -->
+<div class="scanlines fixed inset-0 z-50"></div>
+<!-- TOP APP BAR -->
+<header class="flex justify-between items-center w-full px-gutter-desktop h-14 bg-surface-container-lowest border-b border-outline-variant fixed top-0 z-40 left-0 right-0">
+<!-- Brand Anchor & Search Field -->
+<div class="flex items-center gap-space-lg">
+<div class="flex items-center gap-2">
+<span class="text-title-md font-title-md tracking-wider text-primary-container">LIBRARYTRIX // DB-01</span>
+<span class="px-1.5 py-0.5 bg-primary-container/10 border border-primary-container/40 text-primary-container text-label-sm font-label-sm">ARCHIVE_OS</span>
+</div>
+<!-- Quick Command Input -->
+<div class="relative flex items-center bg-surface-container-low border border-outline-variant px-3 py-1.5 focus-within:border-primary-container focus-within:hud-glow-cyan w-80">
+<span class="text-label-sm font-label-sm text-outline mr-2 select-none">SYS:SEARCH &gt;</span>
+<input class="bg-transparent border-none p-0 text-body-sm font-body-sm text-on-surface focus:ring-0 w-full placeholder:text-outline/60 focus:outline-none" placeholder="Consultar ISBN, título, autor..." type="text">
+<span class="text-code-dense font-code-dense text-outline bg-surface-container px-1.5 py-0.5 border border-outline-variant select-none ml-2">⌘K</span>
+</div>
+</div>
+<!-- Navigation Links -->
+<nav class="hidden lg:flex items-center gap-6">
+<a class="border-b-2 border-primary-container text-primary-container font-label-md tracking-widest pb-1 transition-colors duration-150" href="#catalogue">CATALOGUE</a>
+<a class="text-on-surface-variant font-label-md hover:text-primary pb-1 transition-colors duration-150" href="#leaderboard">LEADERBOARD</a>
+<a class="text-on-surface-variant font-label-md hover:text-primary pb-1 transition-colors duration-150" href="#telemetry">TELEMETRY</a>
+<a class="text-on-surface-variant font-label-md hover:text-primary pb-1 transition-colors duration-150" href="#terminal">TERMINAL</a>
+</nav>
+<!-- Telemetry Indicators & Actions -->
+<div class="flex items-center gap-space-md">
+<!-- Live Sync Telemetry Badge -->
+
+<!-- Icon Actions -->
+<div class="flex items-center gap-1 border-x border-outline-variant px-2">
+<button class="p-1.5 text-on-surface-variant hover:text-primary-container transition-colors" title="Notificações">
+<span class="material-symbols-outlined text-[18px]">notifications</span>
+</button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary-container transition-colors" title="Console Terminal">
+<span class="material-symbols-outlined text-[18px]">terminal</span>
+</button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary-container transition-colors" title="Configurações">
+<span class="material-symbols-outlined text-[18px]">settings</span>
+</button>
+</div>
+<!-- User Badge -->
+<div class="flex items-center gap-2 px-2 py-1 bg-surface-container border border-outline-variant">
+<div class="w-6 h-6 bg-surface-container-high border border-primary-container/40 flex items-center justify-center text-primary-container text-label-sm font-label-sm">
+          OP
+        </div>
+<span class="text-label-sm font-label-sm text-on-surface">OPERATOR_0842</span>
+</div>
+<!-- Primary Action -->
+<button class="bg-primary-container text-surface-container-lowest hover:bg-primary-fixed-dim px-3 py-1.5 text-label-md font-label-md tracking-wider flex items-center gap-1 font-bold shadow-sm transition-all duration-150">
+<span class="material-symbols-outlined text-[16px]">add</span>
+<span class="">[ + NOVO LIVRO ]</span>
+</button>
+</div>
+</header>
+<!-- MAIN HUD WRAPPER (Offset by header height) -->
+<div class="flex pt-14 flex-1">
+<!-- LEFT SIDEBAR: CATEGORY NAVIGATION -->
+<aside class="flex flex-col justify-between w-64 border-r border-outline-variant bg-surface-container-low p-space-sm fixed left-0 top-14 bottom-7 z-30 overflow-y-auto">
+<!-- Top Section of Sidebar -->
+<div class="flex flex-col gap-space-sm">
+<!-- Tactical User Avatar HUD Reticle -->
+<div class="p-3 bg-surface-container-lowest border border-outline-variant mb-2">
+<div class="flex items-center justify-between text-code-dense font-code-dense text-outline mb-1">
+<span class="">SYS_ID: #0842</span>
+<span class="text-[#39ff14]">ENCRYPTED</span>
+</div>
+<div class="text-title-md font-title-md text-on-surface">OPERATOR_0842</div>
+<div class="text-label-sm font-label-sm text-primary-container">CLEARANCE: LVL_5</div>
+<div class="mt-2 w-full bg-surface-container-high h-1">
+<div class="bg-primary-container h-1 w-3/4"></div>
+</div>
+</div>
+<!-- Prominent '+ NOVA CATEGORIA' in Sidebar Header -->
+<div class="mb-2">
+<button class="w-full bg-primary-container/10 border border-primary-container text-primary-container hover:bg-primary-container hover:text-surface-container-lowest px-3 py-2 text-label-sm font-label-sm font-bold flex items-center justify-between transition-all duration-150 hud-glow-cyan">
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]">create_new_folder</span>
+<span class="">+ NOVA CATEGORIA</span>
+</span>
+<span class="text-code-dense font-code-dense border border-current px-1 py-0.2 select-none">ALT+N</span>
+</button>
+</div>
+<!-- Category Partition Header -->
+<div class="px-2 pt-2 text-code-dense font-code-dense text-outline uppercase tracking-wider flex items-center justify-between">
+<span class="">CLASSIFICAÇÃO DE DADOS</span>
+<span class="">(06)</span>
+</div>
+<!-- Nav Category Tabs -->
+<nav class="flex flex-col gap-1 mt-1">
+<!-- All Archives (Active) -->
+<a class="border-l-2 border-primary-container bg-surface-container text-primary-container font-label-sm px-3 py-2 flex items-center justify-between transition-colors duration-150" href="#">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">folder_open</span>
+<span class="">TODOS OS ARQUIVOS</span>
+</div>
+<span class="text-code-dense font-code-dense bg-primary-container/20 px-1.5 py-0.5 text-primary-container border border-primary-container/40">142</span>
+</a>
+<!-- Cyberpunk // Tech (Neon Green) -->
+<a class="border-l-2 border-transparent text-on-surface-variant font-label-sm px-3 py-2 flex items-center justify-between hover:bg-surface-container-high hover:text-on-surface transition-colors duration-150 group" href="#">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-[#39ff14]">terminal</span>
+<span class="group-hover:text-[#39ff14] transition-colors">CYBERPUNK // TECH</span>
+</div>
+<span class="text-code-dense font-code-dense text-[#39ff14] bg-[#39ff14]/10 px-1.5 py-0.5 border border-[#39ff14]/30">48</span>
+</a>
+<!-- Ficção Científica (Neon Cyan) -->
+<a class="border-l-2 border-transparent text-on-surface-variant font-label-sm px-3 py-2 flex items-center justify-between hover:bg-surface-container-high hover:text-on-surface transition-colors duration-150 group" href="#">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-[#00f0ff]">rocket_launch</span>
+<span class="group-hover:text-[#00f0ff] transition-colors">FICÇÃO CIENTÍFICA</span>
+</div>
+<span class="text-code-dense font-code-dense text-[#00f0ff] bg-[#00f0ff]/10 px-1.5 py-0.5 border border-[#00f0ff]/30">36</span>
+</a>
+<!-- Filosofia (Neon Violet) -->
+<a class="border-l-2 border-transparent text-on-surface-variant font-label-sm px-3 py-2 flex items-center justify-between hover:bg-surface-container-high hover:text-on-surface transition-colors duration-150 group" href="#">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-[#a855f7]">psychology</span>
+<span class="group-hover:text-[#a855f7] transition-colors">FILOSOFIA</span>
+</div>
+<span class="text-code-dense font-code-dense text-[#a855f7] bg-[#a855f7]/10 px-1.5 py-0.5 border border-[#a855f7]/30">22</span>
+</a>
+<!-- Distopia (Neon Magenta) -->
+<a class="border-l-2 border-transparent text-on-surface-variant font-label-sm px-3 py-2 flex items-center justify-between hover:bg-surface-container-high hover:text-on-surface transition-colors duration-150 group" href="#">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-[#ff007f]">warning</span>
+<span class="group-hover:text-[#ff007f] transition-colors">DISTOPIA</span>
+</div>
+<span class="text-code-dense font-code-dense text-[#ff007f] bg-[#ff007f]/10 px-1.5 py-0.5 border border-[#ff007f]/30">24</span>
+</a>
+<!-- História (Neon Amber) -->
+<a class="border-l-2 border-transparent text-on-surface-variant font-label-sm px-3 py-2 flex items-center justify-between hover:bg-surface-container-high hover:text-on-surface transition-colors duration-150 group" href="#">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-[#ffb800]">auto_stories</span>
+<span class="group-hover:text-[#ffb800] transition-colors">HISTÓRIA</span>
+</div>
+<span class="text-code-dense font-code-dense text-[#ffb800] bg-[#ffb800]/10 px-1.5 py-0.5 border border-[#ffb800]/30">12</span>
+</a>
+</nav>
+</div>
+<!-- Bottom / Footer Section of Sidebar -->
+<div class="border-t border-outline-variant pt-space-sm flex flex-col gap-1">
+<!-- Commit Data Packet CTA -->
+<button class="w-full bg-surface-container hover:bg-surface-container-highest border border-outline-variant text-on-surface text-label-sm font-label-sm py-2 px-3 flex items-center justify-center gap-2 transition-colors mb-2">
+<span class="material-symbols-outlined text-[16px] text-primary-container">file_download</span>
+<span class="">[ COMMIT_DATAPACKET ]</span>
+</button>
+<a class="border-l-2 border-transparent text-on-surface-variant font-label-sm px-3 py-1.5 flex items-center gap-2 hover:bg-surface-container-high hover:text-on-surface" href="#">
+<span class="material-symbols-outlined text-[16px]">history</span>
+<span class="">HISTÓRICO_SYNC</span>
+</a>
+<a class="border-l-2 border-transparent text-error font-label-sm px-3 py-1.5 flex items-center gap-2 hover:bg-surface-container-high hover:text-on-error-container" href="#">
+<span class="material-symbols-outlined text-[16px]">power_settings_new</span>
+<span class="">SYSTEM_PURGE</span>
+</a>
+</div>
+</aside>
+<!-- MAIN WORKSPACE CONTENT CANVAS (Offset by 64 cols width = 16rem) -->
+<main class="ml-64 flex-1 flex flex-col min-w-0 bg-surface-container-lowest pb-12">
+<!-- TOP TELEMETRY METRIC STRIP (4 Summary Cards) -->
+<section class="border-b border-outline-variant bg-surface-container-lowest p-gutter-desktop grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-md">
+<!-- Telemetry Card 1 -->
+<div class="bg-surface-container-low border border-outline-variant p-space-md relative overflow-hidden group hover:border-primary-container transition-colors">
+<div class="flex items-center justify-between text-code-dense font-code-dense text-outline mb-1">
+<span class="">INDEX_REG // TOTAL</span>
+<span class="text-primary-container">SYS:OK</span>
+</div>
+<div class="text-headline-md font-headline-md text-on-surface font-bold">142 <span class="text-label-md font-label-md text-outline">Vol</span></div>
+<div class="text-code-dense font-code-dense text-on-surface-variant mt-1 flex items-center justify-between">
+<span class="">Codex Principal</span>
+<span class="text-[#39ff14]">+4 este ciclo</span>
+</div>
+<div class="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-container/30 group-hover:bg-primary-container transition-colors"></div>
+</div>
+<!-- Telemetry Card 2 -->
+<div class="bg-surface-container-low border border-outline-variant p-space-md relative overflow-hidden group hover:border-[#39ff14] transition-colors">
+<div class="flex items-center justify-between text-code-dense font-code-dense text-outline mb-1">
+<span class="">MÉTRICA // AVALIAÇÃO</span>
+<span class="text-[#39ff14]">CRITIQUE:94%</span>
+</div>
+<div class="text-headline-md font-headline-md text-[#39ff14] font-bold text-phosphor-green">4.6 <span class="text-label-md font-label-md text-on-surface">★ MÉDIA</span></div>
+<div class="text-code-dense font-code-dense text-on-surface-variant mt-1 flex items-center justify-between">
+<span class="">133 Analisados</span>
+<span class="text-primary-container">9 Pendentes</span>
+</div>
+<div class="absolute bottom-0 left-0 right-0 h-0.5 bg-[#39ff14]/30 group-hover:bg-[#39ff14] transition-colors"></div>
+</div>
+<!-- Telemetry Card 3 -->
+<div class="bg-surface-container-low border border-outline-variant p-space-md relative overflow-hidden group hover:border-[#00f0ff] transition-colors">
+<div class="flex items-center justify-between text-code-dense font-code-dense text-outline mb-1">
+<span class="">REDE // PROTOCOLO</span>
+<span class="text-primary-container">NODE:ONLINE</span>
+</div>
+<div class="text-headline-md font-headline-md text-primary-container font-bold text-phosphor-cyan">99.8% <span class="text-label-md font-label-md text-outline">SYNC</span></div>
+<div class="text-code-dense font-code-dense text-on-surface-variant mt-1 flex items-center justify-between">
+<span class="">Local ↔ Cloud</span>
+<span class="text-[#39ff14]">0 Conflitos</span>
+</div>
+<div class="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-container/30 group-hover:bg-primary-container transition-colors"></div>
+</div>
+<!-- Telemetry Card 4 -->
+<div class="bg-surface-container-low border border-outline-variant p-space-md relative overflow-hidden group hover:border-[#ff007f] transition-colors">
+<div class="flex items-center justify-between text-code-dense font-code-dense text-outline mb-1">
+<span class="">DADOS // DOMINÂNCIA</span>
+<span class="text-[#ff007f]">SECTOR_01</span>
+</div>
+<div class="text-headline-md font-headline-md text-on-surface font-bold">Cyberpunk <span class="text-label-md font-label-md text-[#39ff14]">48%</span></div>
+<div class="text-code-dense font-code-dense text-on-surface-variant mt-1 flex items-center justify-between">
+<span class="">Seguido por Sci-Fi</span>
+<span class="text-outline">68 Vols</span>
+</div>
+<div class="absolute bottom-0 left-0 right-0 h-0.5 bg-[#ff007f]/30 group-hover:bg-[#ff007f] transition-colors"></div>
+</div>
+</section>
+<!-- CONTROL BAR: CATEGORY HEADER, FILTERS & PROMINENT "+ NOVA CATEGORIA" -->
+<section class="p-gutter-desktop border-b border-outline-variant bg-surface-container-low/40 flex flex-col gap-4">
+<!-- Upper Row: Sector Info & High Visibility CTA Button -->
+<div class="flex flex-wrap items-center justify-between gap-4">
+<div class="flex items-center gap-3">
+<span class="text-headline-sm font-headline-sm text-on-surface tracking-tight">CATÁLOGO DE LEITURA &amp; CRÍTICAS</span>
+<span class="text-code-dense font-code-dense px-2 py-0.5 bg-surface-container-high text-primary-container border border-outline-variant">VIEW: GRID_COMPACT</span>
+</div>
+<!-- Highlighted "+ NOVA CATEGORIA" Action Button -->
+<div class="flex items-center gap-3">
+<button class="bg-[#00f0ff]/15 hover:bg-[#00f0ff] text-[#00f0ff] hover:text-[#08080c] border border-[#00f0ff] px-4 py-2 text-label-md font-label-md tracking-wider flex items-center gap-2 font-bold transition-all duration-150 hud-glow-cyan">
+<span class="material-symbols-outlined text-[18px]">add_box</span>
+<span class="">+ NOVA CATEGORIA</span>
+</button>
+<!-- Export / Quick Dump -->
+<button class="bg-surface-container border border-outline-variant hover:border-primary-container text-on-surface-variant hover:text-on-surface px-3 py-2 text-label-sm font-label-sm flex items-center gap-1.5 transition-colors">
+<span class="material-symbols-outlined text-[16px]">file_export</span>
+<span class="">EXPORTAR JSON</span>
+</button>
+</div>
+</div>
+<!-- Lower Row: Detailed Filter Matrix -->
+<div class="flex flex-wrap items-center justify-between gap-4 pt-2 border-t border-outline-variant/60">
+<!-- Category Chips -->
+<div class="flex flex-wrap items-center gap-2 text-label-sm font-label-sm">
+<span class="text-code-dense font-code-dense text-outline mr-1">FILTRO_SETOR:</span>
+<!-- All Active -->
+<button class="px-2.5 py-1 bg-primary-container text-surface-container-lowest border border-primary-container font-bold">
+              [x] TODOS (142)
+            </button>
+<!-- Cyberpunk -->
+<button class="px-2.5 py-1 bg-[#39ff14]/10 text-[#39ff14] border border-[#39ff14]/40 hover:border-[#39ff14] hover:bg-[#39ff14]/20 transition-colors">
+              CYBERPUNK
+            </button>
+<!-- Sci-Fi -->
+<button class="px-2.5 py-1 bg-[#00f0ff]/10 text-[#00f0ff] border border-[#00f0ff]/40 hover:border-[#00f0ff] hover:bg-[#00f0ff]/20 transition-colors">
+              FICÇÃO CIENTÍFICA
+            </button>
+<!-- Filosofia -->
+<button class="px-2.5 py-1 bg-[#a855f7]/10 text-[#a855f7] border border-[#a855f7]/40 hover:border-[#a855f7] hover:bg-[#a855f7]/20 transition-colors">
+              FILOSOFIA
+            </button>
+<!-- Distopia -->
+<button class="px-2.5 py-1 bg-[#ff007f]/10 text-[#ff007f] border border-[#ff007f]/40 hover:border-[#ff007f] hover:bg-[#ff007f]/20 transition-colors">
+              DISTOPIA
+            </button>
+<!-- História -->
+<button class="px-2.5 py-1 bg-[#ffb800]/10 text-[#ffb800] border border-[#ffb800]/40 hover:border-[#ffb800] hover:bg-[#ffb800]/20 transition-colors">
+              HISTÓRIA
+            </button>
+</div>
+<!-- Grade Rating & Sorting Controls -->
+<div class="flex items-center gap-3">
+<!-- Grade Pill Filters -->
+<div class="flex items-center border border-outline-variant bg-surface-container text-code-dense font-code-dense">
+<span class="px-2 py-1 text-outline border-r border-outline-variant">NOTA:</span>
+<button class="px-2 py-1 text-on-surface-variant hover:text-primary-container border-r border-outline-variant hover:bg-surface-container-high">[5.0 ★]</button>
+<button class="px-2 py-1 text-primary-container bg-surface-container-high border-r border-outline-variant font-bold">[4.5+ ★]</button>
+<button class="px-2 py-1 text-on-surface-variant hover:text-primary-container border-r border-outline-variant hover:bg-surface-container-high">[4.0+ ★]</button>
+<button class="px-2 py-1 text-on-surface-variant hover:text-primary-container hover:bg-surface-container-high">[Todos]</button>
+</div>
+<!-- Sort Selector -->
+<div class="flex items-center border border-outline-variant bg-surface-container px-2 py-1 text-label-sm font-label-sm">
+<span class="text-outline mr-2">ORDEM:</span>
+<select class="bg-transparent border-none text-on-surface p-0 focus:ring-0 text-label-sm font-label-sm cursor-pointer">
+<option class="bg-surface-container-low text-on-surface" value="score_desc">MAIOR NOTA [DESC]</option>
+<option class="bg-surface-container-low text-on-surface" value="recent">CRÍTICA RECENTE</option>
+<option class="bg-surface-container-low text-on-surface" value="year">ANO DE PUBLICAÇÃO</option>
+<option class="bg-surface-container-low text-on-surface" value="alpha">TÍTULO [A-Z]</option>
+</select>
+</div>
+</div>
+</div>
+</section>
+<!-- BOOK CATALOG BENTO GRID -->
+<section class="p-gutter-desktop grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-space-lg">
+<!-- CARD 1: NEUROMANCER -->
+<article class="bg-surface-container-low border border-outline-variant hover:border-[#39ff14] transition-all duration-200 flex flex-col group relative">
+<!-- Card Header Strip -->
+<div class="px-4 py-2 border-b border-outline-variant bg-surface-container flex items-center justify-between text-code-dense font-code-dense">
+<span class="text-outline">ARCHIVE_ID // 0842-CYB</span>
+<div class="flex items-center gap-2">
+<span class="px-1.5 py-0.5 border border-[#39ff14] text-[#39ff14] bg-[#39ff14]/10 text-label-sm font-label-sm">CYBERPUNK</span>
+<span class="text-on-surface-variant">EUA // 1984</span>
+</div>
+</div>
+<!-- Card Body: Cover Art + Info -->
+<div class="p-4 flex gap-4">
+<!-- Book Cover -->
+<div class="w-24 h-36 flex-shrink-0 bg-surface-container-high border border-outline-variant relative overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A dark and gritty retro-cyberpunk book cover illustration featuring towering neon monoliths, jagged cybernetic wireframes, and rain-slicked Tokyo streets bathed in sharp lime-green and phosphor-cyan illumination. The mood is high-tech, oppressive, and heavily detailed with high contrast." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5PPmSJX-i8j_F0es5QsV2iAarF-XHJ9NaMY6QxTYN-XTQhLUJ1EBIXmsAfO1Mjp959nmsMMF8RfLZa5Y5lvMt7feBY9adRcU4j40tZoiA0WDjcJW2eTJYANZK6XrVhE0E7HGNeYc1mKAUZzs724fZ0u5AOi2dqFTeFgM4fMJ5YMghkyAD_EBcPokcIIG22ketEYr_2mcF0AFpvLIdbw1zyEi5KjKPlobcOnKysIU">
+<div class="absolute bottom-1 right-1 bg-surface-container-lowest/90 px-1 text-[9px] font-mono text-[#39ff14]">LIDO</div>
+</div>
+<!-- Metadata Details -->
+<div class="flex-1 flex flex-col justify-between min-w-0">
+<div>
+<h3 class="text-title-md font-title-md text-on-surface group-hover:text-[#39ff14] transition-colors truncate">Neuromancer</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant truncate">William Gibson</p>
+<div class="flex items-center gap-2 mt-2">
+<span class="text-code-dense font-code-dense text-outline">STATUS:</span>
+<span class="text-code-dense font-code-dense text-[#39ff14]">CRITICADO</span>
+</div>
+</div>
+<!-- Rating Chevron/Energy Bars (5.0) -->
+<div class="mt-3">
+<div class="flex items-center justify-between text-code-dense font-code-dense mb-1">
+<span class="text-outline">AVALIAÇÃO HUD</span>
+<span class="text-[#39ff14] font-bold text-phosphor-green">5.0 / 5.0</span>
+</div>
+<div class="grid grid-cols-5 gap-1 h-2">
+<div class="bg-[#39ff14]"></div>
+<div class="bg-[#39ff14]"></div>
+<div class="bg-[#39ff14]"></div>
+<div class="bg-[#39ff14]"></div>
+<div class="bg-[#39ff14]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Reader's Critique Snippet -->
+<div class="px-4 py-3 border-t border-outline-variant bg-surface-container-lowest/60">
+<div class="text-code-dense font-code-dense text-[#39ff14] mb-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">terminal</span>
+<span class="">SYS:CRÍTICA &gt;</span>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant line-clamp-2 italic font-mono">
+              "A gênese definitiva da estética sprawl. A prosa de Gibson opera como hardware veloz cortando fibra ótica fria. O céu tinha a cor de canal sintonizado em canal fora do ar."
+            </p>
+</div>
+<!-- Card Footer Action Strip -->
+<div class="px-4 py-2 border-t border-outline-variant bg-surface-container flex items-center justify-between text-label-sm font-label-sm">
+<span class="text-code-dense font-code-dense text-outline">SYNC: 14.10.2024</span>
+<button class="text-[#39ff14] hover:underline flex items-center gap-1 font-bold">
+<span class="">[ VER CRÍTICA COMPLETA ]</span>
+<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</button>
+</div>
+</article>
+<!-- CARD 2: DUNA -->
+<article class="bg-surface-container-low border border-outline-variant hover:border-[#00f0ff] transition-all duration-200 flex flex-col group relative">
+<!-- Card Header Strip -->
+<div class="px-4 py-2 border-b border-outline-variant bg-surface-container flex items-center justify-between text-code-dense font-code-dense">
+<span class="text-outline">ARCHIVE_ID // 0104-SCI</span>
+<div class="flex items-center gap-2">
+<span class="px-1.5 py-0.5 border border-[#00f0ff] text-[#00f0ff] bg-[#00f0ff]/10 text-label-sm font-label-sm">FICÇÃO CIENTÍFICA</span>
+<span class="text-on-surface-variant">EUA // 1965</span>
+</div>
+</div>
+<!-- Card Body: Cover Art + Info -->
+<div class="p-4 flex gap-4">
+<!-- Book Cover -->
+<div class="w-24 h-36 flex-shrink-0 bg-surface-container-high border border-outline-variant relative overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A cinematic science fiction desert planet vista with monolithic spice harvesters crawling across vast obsidian sand dunes under multiple celestial moons. Deep cosmic indigo shadows contrast with glowing electric cyan energy shields, evoking an epic futuristic space opera in high technological fidelity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCoKTWff55zDV8-eoe6xjEwBbyp78nIeNLHvi_ERh5gq7tLAknwHVXofAOxQZkSPqRwbTXs4a3WXBleJWSyB6E9qJ3SU0h5_JeiDh2mWH5TaHqnFo2WVl-9PALw1N5lhf_7swYE6ua_rkbBeeTI5i8YnwST_FzLkVk50x_qoNHLJ28f9xHLXSm471pyes5jj2ybbntvvcFYQf4Nchgp8xHaBWkziOCp6BCxg0bP08">
+<div class="absolute bottom-1 right-1 bg-surface-container-lowest/90 px-1 text-[9px] font-mono text-[#00f0ff]">LIDO</div>
+</div>
+<!-- Metadata Details -->
+<div class="flex-1 flex flex-col justify-between min-w-0">
+<div>
+<h3 class="text-title-md font-title-md text-on-surface group-hover:text-[#00f0ff] transition-colors truncate">Duna</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant truncate">Frank Herbert</p>
+<div class="flex items-center gap-2 mt-2">
+<span class="text-code-dense font-code-dense text-outline">STATUS:</span>
+<span class="text-code-dense font-code-dense text-[#00f0ff]">CRITICADO</span>
+</div>
+</div>
+<!-- Rating Chevron/Energy Bars (4.9) -->
+<div class="mt-3">
+<div class="flex items-center justify-between text-code-dense font-code-dense mb-1">
+<span class="text-outline">AVALIAÇÃO HUD</span>
+<span class="text-[#00f0ff] font-bold text-phosphor-cyan">4.9 / 5.0</span>
+</div>
+<div class="grid grid-cols-5 gap-1 h-2">
+<div class="bg-[#00f0ff]"></div>
+<div class="bg-[#00f0ff]"></div>
+<div class="bg-[#00f0ff]"></div>
+<div class="bg-[#00f0ff]"></div>
+<div class="bg-[#00f0ff]/80"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Reader's Critique Snippet -->
+<div class="px-4 py-3 border-t border-outline-variant bg-surface-container-lowest/60">
+<div class="text-code-dense font-code-dense text-[#00f0ff] mb-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">terminal</span>
+<span class="">SYS:CRÍTICA &gt;</span>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant line-clamp-2 italic font-mono">
+              "Tratado magistral de ecologia, misticismo político e controle de massas. A melange como metáfora máxima de dependência de recursos energéticos galácticos."
+            </p>
+</div>
+<!-- Card Footer Action Strip -->
+<div class="px-4 py-2 border-t border-outline-variant bg-surface-container flex items-center justify-between text-label-sm font-label-sm">
+<span class="text-code-dense font-code-dense text-outline">SYNC: 28.09.2024</span>
+<button class="text-[#00f0ff] hover:underline flex items-center gap-1 font-bold">
+<span class="">[ VER CRÍTICA COMPLETA ]</span>
+<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</button>
+</div>
+</article>
+<!-- CARD 3: 1984 -->
+<article class="bg-surface-container-low border border-outline-variant hover:border-[#ff007f] transition-all duration-200 flex flex-col group relative">
+<!-- Card Header Strip -->
+<div class="px-4 py-2 border-b border-outline-variant bg-surface-container flex items-center justify-between text-code-dense font-code-dense">
+<span class="text-outline">ARCHIVE_ID // 0019-DIS</span>
+<div class="flex items-center gap-2">
+<span class="px-1.5 py-0.5 border border-[#ff007f] text-[#ff007f] bg-[#ff007f]/10 text-label-sm font-label-sm">DISTOPIA</span>
+<span class="text-on-surface-variant">UK // 1949</span>
+</div>
+</div>
+<!-- Card Body: Cover Art + Info -->
+<div class="p-4 flex gap-4">
+<!-- Book Cover -->
+<div class="w-24 h-36 flex-shrink-0 bg-surface-container-high border border-outline-variant relative overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A stark brutalist architectural facade dominated by an ominous glowing surveillance eye reticle emitting intense neon magenta lighting against charcoal concrete blocks. The aesthetic is oppressive, totalitarian, and rendered with crisp geometric shadows and sharp digital grain." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCGa3f0aypZO68rt-TzRtlojnGaFOylpziRGDAHbxktd29UpnBKMR_lhEz6YGbcWlGJAs98RlwWi-oPOiuwXqZmSKTGjMRelF8EPLwEKnBDGxxvkmJs2vo_b0TO63YoxIwE0uiF8WvERk_jMIuK4n_DI_pzU87jP3GZRUBzUxAQzJ4Hzib6LqtXs_ThIJia_z6E95oy6iI2MyHynERfn1LEVqcyazeQWrsbA1tHSjg">
+<div class="absolute bottom-1 right-1 bg-surface-container-lowest/90 px-1 text-[9px] font-mono text-[#ff007f]">LIDO</div>
+</div>
+<!-- Metadata Details -->
+<div class="flex-1 flex flex-col justify-between min-w-0">
+<div>
+<h3 class="text-title-md font-title-md text-on-surface group-hover:text-[#ff007f] transition-colors truncate">1984</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant truncate">George Orwell</p>
+<div class="flex items-center gap-2 mt-2">
+<span class="text-code-dense font-code-dense text-outline">STATUS:</span>
+<span class="text-code-dense font-code-dense text-[#ff007f]">CRITICADO</span>
+</div>
+</div>
+<!-- Rating Chevron/Energy Bars (4.8) -->
+<div class="mt-3">
+<div class="flex items-center justify-between text-code-dense font-code-dense mb-1">
+<span class="text-outline">AVALIAÇÃO HUD</span>
+<span class="text-[#ff007f] font-bold text-phosphor-magenta">4.8 / 5.0</span>
+</div>
+<div class="grid grid-cols-5 gap-1 h-2">
+<div class="bg-[#ff007f]"></div>
+<div class="bg-[#ff007f]"></div>
+<div class="bg-[#ff007f]"></div>
+<div class="bg-[#ff007f]"></div>
+<div class="bg-[#ff007f]/60"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Reader's Critique Snippet -->
+<div class="px-4 py-3 border-t border-outline-variant bg-surface-container-lowest/60">
+<div class="text-code-dense font-code-dense text-[#ff007f] mb-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">terminal</span>
+<span class="">SYS:CRÍTICA &gt;</span>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant line-clamp-2 italic font-mono">
+              "A dessecação do duplipensar e da novilíngua permanece a autópsia mais cirúrgica do autoritarismo cognitivo. O Grande Irmão observa os terminais de dados."
+            </p>
+</div>
+<!-- Card Footer Action Strip -->
+<div class="px-4 py-2 border-t border-outline-variant bg-surface-container flex items-center justify-between text-label-sm font-label-sm">
+<span class="text-code-dense font-code-dense text-outline">SYNC: 03.11.2024</span>
+<button class="text-[#ff007f] hover:underline flex items-center gap-1 font-bold">
+<span class="">[ VER CRÍTICA COMPLETA ]</span>
+<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</button>
+</div>
+</article>
+<!-- CARD 4: O MITO DE SÍSIFO -->
+<article class="bg-surface-container-low border border-outline-variant hover:border-[#a855f7] transition-all duration-200 flex flex-col group relative">
+<!-- Card Header Strip -->
+<div class="px-4 py-2 border-b border-outline-variant bg-surface-container flex items-center justify-between text-code-dense font-code-dense">
+<span class="text-outline">ARCHIVE_ID // 0042-FIL</span>
+<div class="flex items-center gap-2">
+<span class="px-1.5 py-0.5 border border-[#a855f7] text-[#a855f7] bg-[#a855f7]/10 text-label-sm font-label-sm">FILOSOFIA</span>
+<span class="text-on-surface-variant">FRANÇA // 1942</span>
+</div>
+</div>
+<!-- Card Body: Cover Art + Info -->
+<div class="p-4 flex gap-4">
+<!-- Book Cover -->
+<div class="w-24 h-36 flex-shrink-0 bg-surface-container-high border border-outline-variant relative overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="An abstract minimalist philosophical artwork portraying an ethereal silhouette endlessly pushing an illuminated geometric prism up an infinite dark mountain incline. Bathed in mysterious electric violet and neon purple gradients against deep void-black textures." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBH67RI-nJssWnxDx2NI2xxS6iP_s60DAsxVxL4aHsIm0RU-nVVXNl6etFjVzbD1U5ibAf-SHg1eB4wXGDe0tF7bnouW7MuA3uogtucDeEMp95crfaHEW1Ocd4zsWEuz-CL3amrAEKS9vlouWyC44LyCLMF4Ld7fHYT2CC5j3Bt_Q9rPSBYKgA7AgZSm1-W-SaGGzbTH9wweXzJEp7rlHFx6uSuoEjMplxNbAy3uiI">
+<div class="absolute bottom-1 right-1 bg-surface-container-lowest/90 px-1 text-[9px] font-mono text-[#a855f7]">LIDO</div>
+</div>
+<!-- Metadata Details -->
+<div class="flex-1 flex flex-col justify-between min-w-0">
+<div>
+<h3 class="text-title-md font-title-md text-on-surface group-hover:text-[#a855f7] transition-colors truncate">O Mito de Sísifo</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant truncate">Albert Camus</p>
+<div class="flex items-center gap-2 mt-2">
+<span class="text-code-dense font-code-dense text-outline">STATUS:</span>
+<span class="text-code-dense font-code-dense text-[#a855f7]">CRITICADO</span>
+</div>
+</div>
+<!-- Rating Chevron/Energy Bars (4.9) -->
+<div class="mt-3">
+<div class="flex items-center justify-between text-code-dense font-code-dense mb-1">
+<span class="text-outline">AVALIAÇÃO HUD</span>
+<span class="text-[#a855f7] font-bold">4.9 / 5.0</span>
+</div>
+<div class="grid grid-cols-5 gap-1 h-2">
+<div class="bg-[#a855f7]"></div>
+<div class="bg-[#a855f7]"></div>
+<div class="bg-[#a855f7]"></div>
+<div class="bg-[#a855f7]"></div>
+<div class="bg-[#a855f7]/80"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Reader's Critique Snippet -->
+<div class="px-4 py-3 border-t border-outline-variant bg-surface-container-lowest/60">
+<div class="text-code-dense font-code-dense text-[#a855f7] mb-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">terminal</span>
+<span class="">SYS:CRÍTICA &gt;</span>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant line-clamp-2 italic font-mono">
+              "A única questão filosófica verdadeiramente séria: a revolta contra a ausência de sentido. É preciso imaginar Sísifo feliz perante o maquinário existencial."
+            </p>
+</div>
+<!-- Card Footer Action Strip -->
+<div class="px-4 py-2 border-t border-outline-variant bg-surface-container flex items-center justify-between text-label-sm font-label-sm">
+<span class="text-code-dense font-code-dense text-outline">SYNC: 19.11.2024</span>
+<button class="text-[#a855f7] hover:underline flex items-center gap-1 font-bold">
+<span class="">[ VER CRÍTICA COMPLETA ]</span>
+<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</button>
+</div>
+</article>
+<!-- CARD 5: SNOW CRASH -->
+<article class="bg-surface-container-low border border-outline-variant hover:border-[#39ff14] transition-all duration-200 flex flex-col group relative">
+<!-- Card Header Strip -->
+<div class="px-4 py-2 border-b border-outline-variant bg-surface-container flex items-center justify-between text-code-dense font-code-dense">
+<span class="text-outline">ARCHIVE_ID // 0991-CYB</span>
+<div class="flex items-center gap-2">
+<span class="px-1.5 py-0.5 border border-[#39ff14] text-[#39ff14] bg-[#39ff14]/10 text-label-sm font-label-sm">CYBERPUNK</span>
+<span class="text-on-surface-variant">EUA // 1992</span>
+</div>
+</div>
+<!-- Card Body: Cover Art + Info -->
+<div class="p-4 flex gap-4">
+<!-- Book Cover -->
+<div class="w-24 h-36 flex-shrink-0 bg-surface-container-high border border-outline-variant relative overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A vivid virtual reality metaverse grid filled with digital wireframe avatars, katana swords reflecting bright emerald neon lasers, and hyper-dense information highways in a futuristic cyberpunk highway sprawl at high night contrast." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCEquQPZbvWBQkRQDCFkH7A3eM4L1exOjCpSYQ3o1js6OgoW6S5r8y0cjCRkDkY_oovb50ijl3QKbl34tMMoLff7PyrE6SOaaQTq7ua4Yb3pOrM-tGPBcmmA6W8BFXpySVn_IGcmH0_UqHpZ0f3etbMdyMs87dQrgHfk1wYATE3zaTtw9lKKtE4-8dzngL2OpmgtI_kd3gdcnJrw3DLAkDSFaVywlobrtUupvtDa5s">
+<div class="absolute bottom-1 right-1 bg-surface-container-lowest/90 px-1 text-[9px] font-mono text-[#39ff14]">LIDO</div>
+</div>
+<!-- Metadata Details -->
+<div class="flex-1 flex flex-col justify-between min-w-0">
+<div>
+<h3 class="text-title-md font-title-md text-on-surface group-hover:text-[#39ff14] transition-colors truncate">Snow Crash</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant truncate">Neal Stephenson</p>
+<div class="flex items-center gap-2 mt-2">
+<span class="text-code-dense font-code-dense text-outline">STATUS:</span>
+<span class="text-code-dense font-code-dense text-[#39ff14]">CRITICADO</span>
+</div>
+</div>
+<!-- Rating Chevron/Energy Bars (4.7) -->
+<div class="mt-3">
+<div class="flex items-center justify-between text-code-dense font-code-dense mb-1">
+<span class="text-outline">AVALIAÇÃO HUD</span>
+<span class="text-[#39ff14] font-bold">4.7 / 5.0</span>
+</div>
+<div class="grid grid-cols-5 gap-1 h-2">
+<div class="bg-[#39ff14]"></div>
+<div class="bg-[#39ff14]"></div>
+<div class="bg-[#39ff14]"></div>
+<div class="bg-[#39ff14]"></div>
+<div class="bg-[#39ff14]/40"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Reader's Critique Snippet -->
+<div class="px-4 py-3 border-t border-outline-variant bg-surface-container-lowest/60">
+<div class="text-code-dense font-code-dense text-[#39ff14] mb-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">terminal</span>
+<span class="">SYS:CRÍTICA &gt;</span>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant line-clamp-2 italic font-mono">
+              "Sátira frenética da hiper-corporativização e nascimento do conceito de Metaverso. A linguagem como vírus binário biológico e sumério."
+            </p>
+</div>
+<!-- Card Footer Action Strip -->
+<div class="px-4 py-2 border-t border-outline-variant bg-surface-container flex items-center justify-between text-label-sm font-label-sm">
+<span class="text-code-dense font-code-dense text-outline">SYNC: 11.11.2024</span>
+<button class="text-[#39ff14] hover:underline flex items-center gap-1 font-bold">
+<span class="">[ VER CRÍTICA COMPLETA ]</span>
+<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</button>
+</div>
+</article>
+<!-- CARD 6: SAPIENS (HISTÓRIA) -->
+<article class="bg-surface-container-low border border-outline-variant hover:border-[#ffb800] transition-all duration-200 flex flex-col group relative">
+<!-- Card Header Strip -->
+<div class="px-4 py-2 border-b border-outline-variant bg-surface-container flex items-center justify-between text-code-dense font-code-dense">
+<span class="text-outline">ARCHIVE_ID // 0233-HST</span>
+<div class="flex items-center gap-2">
+<span class="px-1.5 py-0.5 border border-[#ffb800] text-[#ffb800] bg-[#ffb800]/10 text-label-sm font-label-sm">HISTÓRIA</span>
+<span class="text-on-surface-variant">ISRAEL // 2011</span>
+</div>
+</div>
+<!-- Card Body: Cover Art + Info -->
+<div class="p-4 flex gap-4">
+<!-- Book Cover -->
+<div class="w-24 h-36 flex-shrink-0 bg-surface-container-high border border-outline-variant relative overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="An anthropological timeline display showing prehistoric human silhouettes evolving toward cybernetic neural interfaces, rendered with rich warm amber neon accents over an intricate dark obsidian fossil matrix backdrop." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBxRmTC3g0jdUJ0GKOXt7ki24LTSLcCPQd7cqqT4NJqFZQWPjsEbFG2KrUM34i8bdqZxoqnU28zn4N08CgtUnWaAjGbR7bszveaWyooplo4qHcN4g2BVhfl1ZsqW_QQVPgYsF0rnOmazqWBrzMAMmKpFBtDNGTTj_aMOwwguqkMnJ6mDfTsM3HjsBbrCzeJh4DfGI8M1iJemkx-Nc6swWbMcGH7ga1s3m4eYoUdDzY">
+<div class="absolute bottom-1 right-1 bg-surface-container-lowest/90 px-1 text-[9px] font-mono text-[#ffb800]">LIDO</div>
+</div>
+<!-- Metadata Details -->
+<div class="flex-1 flex flex-col justify-between min-w-0">
+<div>
+<h3 class="text-title-md font-title-md text-on-surface group-hover:text-[#ffb800] transition-colors truncate">Sapiens</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant truncate">Yuval Noah Harari</p>
+<div class="flex items-center gap-2 mt-2">
+<span class="text-code-dense font-code-dense text-outline">STATUS:</span>
+<span class="text-code-dense font-code-dense text-[#ffb800]">CRITICADO</span>
+</div>
+</div>
+<!-- Rating Chevron/Energy Bars (4.6) -->
+<div class="mt-3">
+<div class="flex items-center justify-between text-code-dense font-code-dense mb-1">
+<span class="text-outline">AVALIAÇÃO HUD</span>
+<span class="text-[#ffb800] font-bold">4.6 / 5.0</span>
+</div>
+<div class="grid grid-cols-5 gap-1 h-2">
+<div class="bg-[#ffb800]"></div>
+<div class="bg-[#ffb800]"></div>
+<div class="bg-[#ffb800]"></div>
+<div class="bg-[#ffb800]"></div>
+<div class="bg-[#ffb800]/30"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Reader's Critique Snippet -->
+<div class="px-4 py-3 border-t border-outline-variant bg-surface-container-lowest/60">
+<div class="text-code-dense font-code-dense text-[#ffb800] mb-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">terminal</span>
+<span class="">SYS:CRÍTICA &gt;</span>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant line-clamp-2 italic font-mono">
+              "A habilidade biológica de crer em mitos compartilhados gerou impérios e moeda. A história da espécie condensada em algoritmos sociais."
+            </p>
+</div>
+<!-- Card Footer Action Strip -->
+<div class="px-4 py-2 border-t border-outline-variant bg-surface-container flex items-center justify-between text-label-sm font-label-sm">
+<span class="text-code-dense font-code-dense text-outline">SYNC: 07.12.2024</span>
+<button class="text-[#ffb800] hover:underline flex items-center gap-1 font-bold">
+<span class="">[ VER CRÍTICA COMPLETA ]</span>
+<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</button>
+</div>
+</article>
+</section>
+<!-- TERMINAL BUFFER / QUICK ENTRY SIMULATION DRAWER -->
+<section class="mx-gutter-desktop mb-6 border border-outline-variant bg-surface-container-low p-space-md">
+<div class="flex items-center justify-between border-b border-outline-variant pb-2 mb-3">
+<div class="flex items-center gap-2 text-label-sm font-label-sm text-primary-container">
+<span class="material-symbols-outlined text-[16px]">terminal</span>
+<span class="">DATAPACKET_CRITIQUE_V4.0 // QUICK_BUFFER: 20_LINES</span>
+</div>
+<span class="text-code-dense font-code-dense text-outline">STATUS: READY_FOR_INPUT</span>
+</div>
+<div class="flex flex-col lg:flex-row gap-4">
+<!-- Code line indicator + Input simulation -->
+<div class="flex-1 bg-surface-container-lowest border border-outline-variant p-3 font-mono text-body-sm flex">
+<div class="select-none text-outline/50 pr-3 border-r border-outline-variant text-right text-code-dense">
+              01<br>02<br>03<br>04
+            </div>
+<div class="pl-3 text-on-surface flex-1">
+<span class="text-primary-container">SYS:LOG &gt;</span> Iniciando novo registro de leitura crítica...<br>
+<span class="text-outline">SELECT BOOK:</span> [ Digite para indexar volume pendente ]<br>
+<span class="text-[#39ff14]">ESTRUTURA DE DADOS:</span> Sincronizada localmente via SQLite IndexedDB.<br>
+<span class="animate-pulse text-primary-container">█</span>
+</div>
+</div>
+<!-- Quick Action Buttons inside drawer -->
+<div class="w-full lg:w-64 flex flex-col justify-between gap-2">
+<div class="text-code-dense font-code-dense text-outline">
+              CLASSIFICAÇÃO RÁPIDA:<br>
+<span class="text-on-surface">Pressione CTRL+ENTER para submeter crítica ao banco de dados mestre.</span>
+</div>
+<button class="w-full bg-primary-container text-surface-container-lowest font-bold py-2 text-label-sm font-label-sm hover:bg-primary-fixed-dim transition-colors">
+              [ EXECUTAR PARSER ]
+            </button>
+</div>
+</div>
+</section>
+</main>
+</div>
+<!-- FIXED BOTTOM TELEMETRY STATUS BAR -->
+<footer class="fixed bottom-0 left-0 right-0 h-7 bg-surface-container-lowest border-t border-outline-variant z-40 px-gutter-desktop flex items-center justify-between text-code-dense font-code-dense text-outline select-none">
+<div class="flex items-center gap-4">
+<span class="flex items-center gap-1.5 text-on-surface">
+<span class="h-2 w-2 rounded-none bg-primary-container inline-block"></span>
+<span class="">LIBRARYTRIX // PROTOCOLO_v4.2.1</span>
+</span>
+<span class="">|</span>
+<span class="">STORAGE: 1.48GB / 5.00GB (LOCAL_CIPHER)</span>
+<span class="">|</span>
+<span class="text-[#39ff14]">ENCRIPTAÇÃO: AES-256-GCM ATIVA</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-on-surface-variant">LOC: BR-SÃO_PAULO [OPERATOR_NODE]</span>
+<span class="">|</span>
+<span class="text-primary-container">LATÊNCIA: 12ms</span>
+<span class="">|</span>
+<span class="">SYS_STATUS: OPTIMAL</span>
+</div>
+</footer>
+
+
+</body></html>
