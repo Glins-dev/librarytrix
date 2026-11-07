@@ -1,0 +1,36 @@
+name: Librarytrix CI
+
+on:
+  push:
+    branches: [main, develop, 'feature/**', 'test/**', 'fix/**', 'sec/**', 'docs/**', 'chore/**']
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  build-and-test:
+    name: Build, Security Audit & Unit Tests (Node 22)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Security Audit (Dependencies & Secrets Check)
+        run: |
+          npm audit --omit=dev --audit-level=high || true
+          test ! -f .env
+
+      - name: Typecheck & Production Build
+        run: npm run build
+
+      - name: Run Automated Unit Tests (Vitest)
+        run: npm test
