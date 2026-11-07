@@ -10,8 +10,9 @@ import { db } from './firebase';
 import { SEED_BOOKS, SEED_CATEGORIES } from './seed';
 import type { Book, Category, SyncState } from '../types';
 
-const BOOKS_KEY = 'librarytrix:books';
-const CATEGORIES_KEY = 'librarytrix:categories';
+/** Chaves de armazenamento local isoladas por UID do usuário autenticado. */
+export const booksKey = (uid: string) => `librarytrix_books_${uid}`;
+export const categoriesKey = (uid: string) => `librarytrix_categories_${uid}`;
 
 /** IDs de documento do Firestore não aceitam "/" — o `id` de exibição fica no campo. */
 const docId = (id: string) => id.replace(/[^a-zA-Z0-9-]+/g, '_');
@@ -31,70 +32,89 @@ function writeLocal<T>(key: string, value: T) {
   localStorage.setItem(key, JSON.stringify(value));
 }
 
-/** Leitura síncrona imediata (localStorage já pré-carregado com o seed). */
-export function loadLocal(): { books: Book[]; categories: Category[] } {
-  const rawBooks = readLocal<Book[]>(BOOKS_KEY, SEED_BOOKS);
+/**
+ * Leitura síncrona imediata para a conta do usuário autenticado (`uid`).
+ * Se for o primeiro acesso da conta, inicializa com as 5 categorias padrão e o seed inicial
+ * de forma totalmente isolada das demais contas.
+ */
+export function loadLocal(uid: string): { books: Book[]; categories: Category[] } {
+  const initialBooks = SEED_BOOKS.map((b) => ({ ...b, userId: uid }));
+  const initialCats = SEED_CATEGORIES.map((c) => ({ ...c, userId: uid }));
+
+  const rawBooks = readLocal<Book[]>(booksKey(uid), initialBooks);
   const books = rawBooks.map((b) => ({
     ...b,
+    userId: uid,
     id: b.id.replace('ARCHIVE_ID // ', 'ID_ARQUIVO // '),
     originalNationality: b.originalNationality === 'UK' ? 'REINO UNIDO' : b.originalNationality,
   }));
-  return {
-    books,
-    categories: readLocal<Category[]>(CATEGORIES_KEY, SEED_CATEGORIES),
-  };
+  const categories = readLocal<Category[]>(categoriesKey(uid), initialCats).map((c) => ({
+    ...c,
+    userId: uid,
+  }));
+
+  return { books, categories };
 }
 
 /**
- * Sincroniza com o Firestore (quando configurado). Se a nuvem estiver vazia,
- * envia os dados locais; caso contrário, a nuvem vence e atualiza o cache local.
+ * Sincroniza o acervo isolado do usuário (`users/{uid}/books` e `users/{uid}/categories`)
+ * com o Firestore. Se a subcoleção da conta na nuvem estiver vazia, envia o seed inicial.
  */
-export async function syncFromCloud(): Promise<{
+export async function syncFromCloud(uid: string): Promise<{
   books: Book[];
   categories: Category[];
   state: SyncState;
 }> {
-  const local = loadLocal();
+  const local = loadLocal(uid);
   if (!db) return { ...local, state: 'LOCAL' };
   try {
-    const [bookSnap, catSnap] = await Promise.all([
-      getDocs(collection(db, 'books')),
-      getDocs(collection(db, 'categories')),
-    ]);
+    const userBooksCol = collection(db, 'users', uid, 'books');
+    const userCatsCol = collection(db, 'users', uid, 'categories');
+    const [bookSnap, catSnap] = await Promise.all([getDocs(userBooksCol), getDocs(userCatsCol)]);
+
     if (bookSnap.empty && catSnap.empty) {
       const batch = writeBatch(db);
-      local.books.forEach((b) => batch.set(doc(db!, 'books', docId(b.id)), b));
-      local.categories.forEach((c) => batch.set(doc(db!, 'categories', docId(c.id)), c));
+      local.books.forEach((b) =>
+        batch.set(doc(db!, 'users', uid, 'books', docId(b.id)), { ...b, userId: uid }),
+      );
+      local.categories.forEach((c) =>
+        batch.set(doc(db!, 'users', uid, 'categories', docId(c.id)), { ...c, userId: uid }),
+      );
       await batch.commit();
       return { ...local, state: 'CLOUD' };
     }
-    const books = bookSnap.docs.map((d) => d.data() as Book);
-    const categories = catSnap.docs.map((d) => d.data() as Category);
+
+    const books = bookSnap.docs.map((d) => ({ ...(d.data() as Book), userId: uid }));
+    const categories = catSnap.docs.map((d) => ({ ...(d.data() as Category), userId: uid }));
     const merged = {
       books: books.length ? books : local.books,
       categories: categories.length ? categories : local.categories,
     };
-    writeLocal(BOOKS_KEY, merged.books);
-    writeLocal(CATEGORIES_KEY, merged.categories);
+    writeLocal(booksKey(uid), merged.books);
+    writeLocal(categoriesKey(uid), merged.categories);
     return { ...merged, state: 'CLOUD' };
   } catch (err) {
-    console.warn('[Librarytrix] Firestore indisponível, modo offline.', err);
+    console.warn('[Librarytrix] Firestore indisponível, operando em modo offline isolado.', err);
     return { ...local, state: 'OFFLINE' };
   }
 }
 
-/** Persiste a lista completa localmente e tenta espelhar os itens alterados na nuvem. */
+/** Persiste a lista completa no cache isolado do usuário e espelha em `users/{uid}/books`. */
 export async function persistBooks(
+  uid: string,
   books: Book[],
   changed?: Book | Book[],
   removedId?: string,
 ): Promise<SyncState> {
-  writeLocal(BOOKS_KEY, books);
+  const stamped = books.map((b) => ({ ...b, userId: uid }));
+  writeLocal(booksKey(uid), stamped);
   if (!db) return 'LOCAL';
   try {
     const list = changed ? (Array.isArray(changed) ? changed : [changed]) : [];
-    await Promise.all(list.map((b) => setDoc(doc(db!, 'books', docId(b.id)), b)));
-    if (removedId) await deleteDoc(doc(db, 'books', docId(removedId)));
+    await Promise.all(
+      list.map((b) => setDoc(doc(db!, 'users', uid, 'books', docId(b.id)), { ...b, userId: uid })),
+    );
+    if (removedId) await deleteDoc(doc(db, 'users', uid, 'books', docId(removedId)));
     return 'CLOUD';
   } catch {
     return 'OFFLINE';
@@ -102,36 +122,56 @@ export async function persistBooks(
 }
 
 /**
- * Exclui uma categoria preservando a integridade: livros vinculados são
+ * Exclui uma categoria do usuário preservando a integridade: livros vinculados são
  * reatribuídos à categoria `fallback` (GERAL), criada se ainda não existir.
  */
 export async function removeCategory(
+  uid: string,
   books: Book[],
   categories: Category[],
   target: Category,
   fallback: Category,
 ): Promise<{ books: Book[]; categories: Category[]; state: SyncState }> {
   const affected = books.filter((b) => b.category === target.name);
-  const nextBooks = books.map((b) => (b.category === target.name ? { ...b, category: fallback.name } : b));
+  const nextBooks = books.map((b) =>
+    b.category === target.name ? { ...b, category: fallback.name, userId: uid } : b,
+  );
   let nextCats = categories.filter((c) => c.id !== target.id);
+  const stampedFallback = { ...fallback, userId: uid };
   const needsFallback = affected.length > 0 && !nextCats.some((c) => c.name === fallback.name);
-  if (needsFallback) nextCats = [...nextCats, fallback];
+  if (needsFallback) nextCats = [...nextCats, stampedFallback];
 
-  const s1 = await persistCategories(nextCats, needsFallback ? fallback : undefined, target.id);
-  const s2 = await persistBooks(nextBooks, affected.map((b) => ({ ...b, category: fallback.name })));
-  return { books: nextBooks, categories: nextCats, state: s1 === 'OFFLINE' || s2 === 'OFFLINE' ? 'OFFLINE' : s2 };
+  const s1 = await persistCategories(uid, nextCats, needsFallback ? stampedFallback : undefined, target.id);
+  const s2 = await persistBooks(
+    uid,
+    nextBooks,
+    affected.map((b) => ({ ...b, category: fallback.name, userId: uid })),
+  );
+  return {
+    books: nextBooks,
+    categories: nextCats,
+    state: s1 === 'OFFLINE' || s2 === 'OFFLINE' ? 'OFFLINE' : s2,
+  };
 }
 
+/** Persiste as categorias no cache isolado do usuário e espelha em `users/{uid}/categories`. */
 export async function persistCategories(
+  uid: string,
   categories: Category[],
   changed?: Category,
   removedId?: string,
 ): Promise<SyncState> {
-  writeLocal(CATEGORIES_KEY, categories);
+  const stamped = categories.map((c) => ({ ...c, userId: uid }));
+  writeLocal(categoriesKey(uid), stamped);
   if (!db) return 'LOCAL';
   try {
-    if (changed) await setDoc(doc(db, 'categories', docId(changed.id)), changed);
-    if (removedId) await deleteDoc(doc(db, 'categories', docId(removedId)));
+    if (changed) {
+      await setDoc(doc(db, 'users', uid, 'categories', docId(changed.id)), {
+        ...changed,
+        userId: uid,
+      });
+    }
+    if (removedId) await deleteDoc(doc(db, 'users', uid, 'categories', docId(removedId)));
     return 'CLOUD';
   } catch {
     return 'OFFLINE';
@@ -147,10 +187,11 @@ export function nextArchiveId(books: Book[], suffix: string): string {
   return `ID_ARQUIVO // ${String(max + 1).padStart(4, '0')}-${suffix}`;
 }
 
-/** Baixa o backup completo do acervo em .json. */
-export function exportJson(books: Book[], categories: Category[]) {
+/** Baixa o backup completo do acervo do operador autenticado em .json. */
+export function exportJson(books: Book[], categories: Category[], operatorName?: string) {
   const payload = {
     app: 'librarytrix',
+    operator: operatorName ?? 'OPERADOR',
     exportedAt: new Date().toISOString(),
     categories,
     books,
@@ -163,4 +204,3 @@ export function exportJson(books: Book[], categories: Category[]) {
   a.click();
   URL.revokeObjectURL(url);
 }
-

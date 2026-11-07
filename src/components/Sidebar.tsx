@@ -1,6 +1,9 @@
-import { DEFAULT_CATEGORY, type Book, type Category } from '../types';
+import { getOperatorInitials, getOperatorNodeId } from '../services/authService';
+import { DEFAULT_CATEGORY, type Book, type Category, type OperatorUser } from '../types';
 
 interface Props {
+  user: OperatorUser;
+  onLogout: () => void;
   books: Book[];
   categories: Category[];
   selected: string | null;
@@ -20,18 +23,45 @@ const ICONS: Record<string, string> = {
   História: 'auto_stories',
 };
 
-export default function Sidebar({ books, categories, selected, onSelect, onNewCategory, onDeleteCategory, onExport, onPurge, onHistory }: Props) {
+export default function Sidebar({
+  user,
+  onLogout,
+  books,
+  categories,
+  selected,
+  onSelect,
+  onNewCategory,
+  onDeleteCategory,
+  onExport,
+  onPurge,
+  onHistory,
+}: Props) {
+  const initials = getOperatorInitials(user.displayName);
+  const nodeId = getOperatorNodeId(user.uid);
+
   return (
     <aside className="hidden lg:flex flex-col justify-between w-64 border-r border-outline-variant bg-surface-container-low p-space-sm fixed left-0 top-14 bottom-7 z-30 overflow-y-auto">
       <div className="flex flex-col gap-space-sm">
         <div className="p-3 bg-surface-container-lowest border border-outline-variant mb-2">
-          <div className="flex items-center justify-between text-code-dense font-code-dense text-outline mb-1">
-            <span>ID_SIS: #0842</span>
+          <div className="flex items-center justify-between text-code-dense font-code-dense text-outline mb-1.5">
+            <span>ID_SIS: {nodeId}</span>
             <span className="text-[#39ff14]">CRIPTOGRAFADO</span>
           </div>
-          <div className="text-title-md font-title-md text-on-surface">OPERADOR_0842</div>
-          <div className="text-label-sm font-label-sm text-primary-container">ACESSO: NÍVEL_5</div>
-          <div className="mt-2 w-full bg-surface-container-high h-1">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 bg-surface-container-high border border-primary-container/50 flex items-center justify-center text-primary-container text-label-md font-label-md font-bold shrink-0">
+              {initials}
+            </div>
+            <div className="min-w-0">
+              <div className="text-title-md font-title-md text-on-surface uppercase truncate" title={user.displayName}>
+                {user.displayName}
+              </div>
+              <div className="text-code-dense font-code-dense text-outline truncate" title={user.email}>
+                {user.email}
+              </div>
+            </div>
+          </div>
+          <div className="text-label-sm font-label-sm text-primary-container mt-2">ACESSO: NÍVEL_5 // ISOLADO</div>
+          <div className="mt-1.5 w-full bg-surface-container-high h-1">
             <div className="bg-primary-container h-1 w-3/4" />
           </div>
         </div>
@@ -117,7 +147,7 @@ export default function Sidebar({ books, categories, selected, onSelect, onNewCa
       <div className="border-t border-outline-variant pt-space-sm flex flex-col gap-1">
         <button
           onClick={onExport}
-          className="w-full bg-surface-container hover:bg-surface-container-highest border border-outline-variant text-on-surface text-label-sm font-label-sm py-2 px-3 flex items-center justify-center gap-2 transition-colors mb-2"
+          className="w-full bg-surface-container hover:bg-surface-container-highest border border-outline-variant text-on-surface text-label-sm font-label-sm py-2 px-3 flex items-center justify-center gap-2 transition-colors mb-1"
         >
           <span className="material-symbols-outlined text-[16px] text-primary-container">file_download</span>
           [ SALVAR PACOTE DE DADOS ]
@@ -135,6 +165,13 @@ export default function Sidebar({ books, categories, selected, onSelect, onNewCa
         >
           <span className="material-symbols-outlined text-[16px]">power_settings_new</span>
           LIMPAR DADOS LOCAIS
+        </button>
+        <button
+          onClick={onLogout}
+          className="mt-1 w-full bg-[#ff007f]/10 hover:bg-[#ff007f] text-[#ff007f] hover:text-surface-container-lowest border border-[#ff007f]/60 font-label-sm text-label-sm font-bold py-2 px-3 flex items-center justify-center gap-2 transition-colors"
+        >
+          <span className="material-symbols-outlined text-[16px]">logout</span>
+          [ ENCERRAR SESSÃO ]
         </button>
       </div>
     </aside>

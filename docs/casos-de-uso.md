@@ -5,6 +5,7 @@
 ```mermaid
 flowchart LR
   O((Operador))
+  O --> UC10[UC10 Autenticar e isolar conta]
   O --> UC1[UC01 Cadastrar livro]
   O --> UC2[UC02 Editar/Excluir livro]
   O --> UC3[UC03 Registrar crítica 1000 caracteres]
@@ -66,4 +67,12 @@ flowchart LR
 - **Exceções / Estados vazios:**
   - Categoria selecionada sem livros → Bloco 2 exibe `0.0 ★ MÉDIA` e `Sem registros`.
   - Acervo sem nenhum livro → Bloco 3 exibe `NENHUM REGISTRO` e `Aguardando indexação...`.
+
+## UC10 — Autenticação e Isolamento de Conta de Usuário
+- **Pré-condição:** operador não autenticado visualiza exclusivamente a tela `AuthTerminal`.
+- **Fluxo principal (Registro):** 1) Operador seleciona a aba `[ REGISTRAR NOVO OPERADOR ]`. 2) Informa Nome de Operador/Codinome, E-mail, Senha (acompanhando o indicador `FRACA` / `MÉDIA` / `FORTE`) e Confirmação de Senha. 3) Clica em `[ CRIAR CONTA E INICIALIZAR ACERVO ]`. 4) O sistema valida os requisitos de segurança da senha, cria a conta no Firebase Auth (ou gera *salt* + hash `SHA-256` no cofre local), inicializa o acervo isolado do UID (`users/{uid}/books` e `users/{uid}/categories` / `librarytrix_books_${uid}`) e libera o acesso ao catálogo exibindo o nome e as iniciais do operador no cabeçalho e na Sidebar.
+- **Fluxo alternativo A1 (Login):** Operador seleciona `[ AUTENTICAR OPERADOR ]`, informa E-mail e Senha e clica em `[ INICIAR SESSÃO DO OPERADOR ]` → o sistema valida as credenciais e carrega apenas os livros e categorias pertencentes àquele `uid`.
+- **Fluxo alternativo A2 (Logout):** Operador clica em `[ ENCERRAR SESSÃO ]` no cabeçalho ou na Sidebar → o sistema limpa imediatamente o estado em memória, encerra a sessão e retorna para o `AuthTerminal`.
+- **Fluxo de exceção E1:** senha com menos de 8 caracteres ou sem maiúscula/minúscula/número-ou-símbolo, confirmação divergente, e-mail já cadastrado ou 5 tentativas inválidas consecutivas → o sistema exibe mensagem de erro em PT-BR e bloqueia o acesso.
+- **Pós-condição:** nenhum operador consegue visualizar ou modificar livros ou categorias de outra conta.
 
